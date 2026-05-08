@@ -57,11 +57,6 @@
                             </ImageView>
                            </children>
                         </HBox>
-                        
-                        <Label text="BOSCH" textFill="#888888">
-                           <font><Font size="11.0" /></font>
-                           <VBox.margin><Insets top="10.0" /></VBox.margin>
-                        </Label>
                         <Label text="Bujía de Iridio Alto Rendimiento" wrapText="true">
                            <font><Font name="System Bold" size="14.0" /></font>
                            <VBox.margin><Insets top="5.0" /></VBox.margin>
@@ -84,10 +79,6 @@
                             </ImageView>
                            </children>
                         </HBox>
-                        <Label text="BREMBO" textFill="#888888">
-                           <font><Font size="11.0" /></font>
-                           <VBox.margin><Insets top="10.0" /></VBox.margin>
-                        </Label>
                         <Label text="Balatas de Cerámica Delanteras" wrapText="true">
                            <font><Font name="System Bold" size="14.0" /></font>
                            <VBox.margin><Insets top="5.0" /></VBox.margin>
@@ -111,10 +102,6 @@
                             </ImageView>
                            </children>
                         </HBox>
-                        <Label text="CASTROL" textFill="#888888">
-                           <font><Font size="11.0" /></font>
-                           <VBox.margin><Insets top="10.0" /></VBox.margin>
-                        </Label>
                         <Label text="Aceite Sintético EDGE 5W-30" wrapText="true">
                            <font><Font name="System Bold" size="14.0" /></font>
                            <VBox.margin><Insets top="5.0" /></VBox.margin>
