@@ -11,95 +11,118 @@
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane prefHeight="700.0" prefWidth="1000.0" style="-fx-background-color: #FFFFFF;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
 
    <top>
-      <HBox alignment="CENTER" prefHeight="90.0" spacing="20.0">
+      <HBox alignment="CENTER" prefHeight="90.0" spacing="20.0" style="-fx-background-color: #FFFFFF; -fx-padding: 0 40 0 40; -fx-border-color: transparent transparent #EEEEEE transparent; -fx-border-width: 1;">
          <children>
-            <Button text="☰" />
+            <Button style="-fx-background-color: transparent; -fx-cursor: hand; -fx-text-fill: #333333;" text="☰">
+               <font>
+                  <Font size="28.0" />
+               </font>
+            </Button>
 
-            <TextField prefHeight="45.0" promptText="Buscar autopartes, códigos o marcas..." HBox.hgrow="ALWAYS" />
+            <TextField prefHeight="45.0" promptText="Buscar autopartes, códigos o marcas..." style="-fx-background-color: #F5F5F5; -fx-background-radius: 4; -fx-border-color: transparent; -fx-padding: 0 20;" HBox.hgrow="ALWAYS">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </TextField>
 
-            <Button prefHeight="45.0" prefWidth="120.0" text="Buscar" />
+            <Button prefHeight="45.0" prefWidth="120.0" style="-fx-background-color: #FFFFFF; -fx-border-color: #DDDDDD; -fx-border-radius: 4; -fx-cursor: hand; -fx-text-fill: #333333;" text="Buscar">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Button>
          </children>
-         <padding>
-            <Insets bottom="10.0" left="40.0" right="40.0" top="10.0" />
-         </padding>
       </HBox>
    </top>
 
    <center>
-      <ScrollPane fitToWidth="true" BorderPane.alignment="CENTER">
+      <ScrollPane fitToWidth="true" style="-fx-background-color: #FFFFFF; -fx-background: #FFFFFF; -fx-border-color: transparent;" BorderPane.alignment="CENTER">
          <content>
-            <FlowPane alignment="TOP_CENTER" hgap="35.0" vgap="40.0">
-               <padding>
-                  <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
-               </padding>
+            <FlowPane alignment="TOP_CENTER" hgap="35.0" style="-fx-background-color: #FFFFFF; -fx-padding: 40;" vgap="40.0">
                <children>
 
-                  <VBox prefWidth="250.0" spacing="5.0">
-                     <padding>
-                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                     </padding>
+                  <VBox prefWidth="250.0" style="-fx-background-color: #FFFFFF; -fx-border-color: #F0F0F0; -fx-border-width: 1; -fx-border-radius: 4; -fx-padding: 20; -fx-cursor: hand;">
                      <children>
-                        <Label text="NUEVO" />
                         
                         <HBox alignment="CENTER" prefHeight="160.0">
                            <children>
-                              <ImageView fitHeight="140.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@images/Bujia_AltoRendimiento.jpg" />
-                                 </image>
-                              </ImageView>
+                            <ImageView fitHeight="166.0" fitWidth="217.0" pickOnBounds="true" preserveRatio="true">
+                                <image>
+                                    <Image url="@../../../../../../../../../../Downloads/Bujia_AltoRendimiento.jpg" />
+                                </image>
+                            </ImageView>
                            </children>
                         </HBox>
                         
-                        <Label text="BOSCH" />
-                        <Label text="Bujía de Iridio Alto Rendimiento" wrapText="true" />
-                        <Label text="\$ 350.00" />
+                        <Label text="BOSCH" textFill="#888888">
+                           <font><Font size="11.0" /></font>
+                           <VBox.margin><Insets top="10.0" /></VBox.margin>
+                        </Label>
+                        <Label text="Bujía de Iridio Alto Rendimiento" wrapText="true">
+                           <font><Font name="System Bold" size="14.0" /></font>
+                           <VBox.margin><Insets top="5.0" /></VBox.margin>
+                        </Label>
+                        <Label text="\$ 350.00" textFill="#e53935">
+                           <font><Font name="System Bold" size="18.0" /></font>
+                           <VBox.margin><Insets top="10.0" /></VBox.margin>
+                        </Label>
                      </children>
                   </VBox>
 
-                  <VBox prefWidth="250.0" spacing="5.0">
-                     <padding>
-                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                     </padding>
+                  <VBox prefWidth="250.0" style="-fx-background-color: #FFFFFF; -fx-border-color: #F0F0F0; -fx-border-width: 1; -fx-border-radius: 4; -fx-padding: 20; -fx-cursor: hand;">
                      <children>
-                        <Label text="OFERTA" />
                         <HBox alignment="CENTER" prefHeight="160.0">
                            <children>
-                              <ImageView fitHeight="140.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@images/Balatas_ceramica.jpg" />
-                                 </image>
-                              </ImageView>
+                            <ImageView fitHeight="177.0" fitWidth="217.0" pickOnBounds="true" preserveRatio="true">
+                                <image>
+                                    <Image url="@../../../../../../../../../../Downloads/Balatas_ceramica.jpg" />
+                                </image>
+                            </ImageView>
                            </children>
                         </HBox>
-                        <Label text="BREMBO" />
-                        <Label text="Balatas de Cerámica Delanteras" wrapText="true" />
-                        <Label text="\$ 1,299.00" />
+                        <Label text="BREMBO" textFill="#888888">
+                           <font><Font size="11.0" /></font>
+                           <VBox.margin><Insets top="10.0" /></VBox.margin>
+                        </Label>
+                        <Label text="Balatas de Cerámica Delanteras" wrapText="true">
+                           <font><Font name="System Bold" size="14.0" /></font>
+                           <VBox.margin><Insets top="5.0" /></VBox.margin>
+                        </Label>
+                        <Label text="\$ 1,299.00" textFill="#e53935">
+                           <font><Font name="System Bold" size="18.0" /></font>
+                           <VBox.margin><Insets top="10.0" /></VBox.margin>
+                        </Label>
                      </children>
                   </VBox>
 
-                  <VBox prefWidth="250.0" spacing="5.0">
-                     <padding>
-                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                     </padding>
+                  <VBox prefWidth="250.0" style="-fx-background-color: #FFFFFF; -fx-border-color: #F0F0F0; -fx-border-width: 1; -fx-border-radius: 4; -fx-padding: 20; -fx-cursor: hand;">
                      <children>
-                        <Label text=" " />
+                        <Label text=" "><font><Font size="10.0" /></font></Label>
                         <HBox alignment="CENTER" prefHeight="160.0">
                            <children>
                               <ImageView fitHeight="140.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@images/AceiteEdge.jpg" />
-                                 </image>
-                              </ImageView>
+                                <image>
+                                    <Image url="@../../../../../../../../../../Downloads/AceiteEdge.jpg" />
+                                </image>
+                            </ImageView>
                            </children>
                         </HBox>
-                        <Label text="CASTROL" />
-                        <Label text="Aceite Sintético EDGE 5W-30" wrapText="true" />
-                        <Label text="\$ 980.00" />
+                        <Label text="CASTROL" textFill="#888888">
+                           <font><Font size="11.0" /></font>
+                           <VBox.margin><Insets top="10.0" /></VBox.margin>
+                        </Label>
+                        <Label text="Aceite Sintético EDGE 5W-30" wrapText="true">
+                           <font><Font name="System Bold" size="14.0" /></font>
+                           <VBox.margin><Insets top="5.0" /></VBox.margin>
+                        </Label>
+                        <Label text="\$ 980.00" textFill="#e53935">
+                           <font><Font name="System Bold" size="18.0" /></font>
+                           <VBox.margin><Insets top="10.0" /></VBox.margin>
+                        </Label>
                      </children>
                   </VBox>
 
