@@ -1,6 +1,6 @@
-package com.autopiezas.controlador;
+package com.autopartes.Controlador;
 
-import com.autopiezas.modelo.Conexion;
+import com.autopartes.Modelo.Conexion;
 import javafx.fxml.FXML;
 import java.sql.Connection;
 import java.sql.SQLException;

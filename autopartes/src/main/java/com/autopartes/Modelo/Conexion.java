@@ -1,4 +1,4 @@
-package com.autopiezas.modelo;
+package com.autopartes.Modelo;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
