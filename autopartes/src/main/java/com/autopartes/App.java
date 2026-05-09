@@ -1,24 +1,24 @@
 package com.autopartes;
 
 import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import java.io.IOException;
 
-
-/**
- * JavaFX App
- */
 public class App extends Application {
 
     @Override
-    public void start(Stage stage) {
-        var javaVersion = SystemInfo.javaVersion();
-        var javafxVersion = SystemInfo.javafxVersion();
-
-        var label = new Label("Hello, JavaFX " + javafxVersion + ", running on Java " + javaVersion + ".");
-        var scene = new Scene(new StackPane(label), 640, 480);
+    public void start(Stage stage) throws IOException {
+        // Cargamos el archivo FXML desde la carpeta de recursos
+        // Asegúrate de que el nombre coincida exactamente (ej: pantalla.fxml)
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/autopartes/prueba.fxml"));
+        
+        Parent root = loader.load();
+        Scene scene = new Scene(root);
+        
+        stage.setTitle("Gestor de Auto-piezas - Prueba de Conexión");
         stage.setScene(scene);
         stage.show();
     }
@@ -26,5 +26,4 @@ public class App extends Application {
     public static void main(String[] args) {
         launch();
     }
-
 }
