@@ -1,5 +1,7 @@
-module-info.class
 com\autopartes\SystemInfo.class
 com\autopartes\Controlador\prueba.class
+com\autopartes\Modelo\PiezaDAO.class
+com\autopartes\Modelo\Pieza.class
+module-info.class
 com\autopartes\App.class
 com\autopartes\Modelo\Conexion.class
