@@ -38,88 +38,142 @@
 }
 
 /* =======================================================
-   2. ESTILOS GLOBALES: BOTONES
+   2. ESTILOS GLOBALES: BOTONES (Tonos Azul Profundo)
    ======================================================= */
 
-/* Botón por defecto (Botón principal) */
 .button {
-    -fx-background-color: #2D3748; /* Gris oscuro elegante */
+    -fx-background-color: #1E3A8A; /* Azul noche / Zafiro profundo */
     -fx-text-fill: #FFFFFF;
     -fx-font-weight: bold;
     -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
-    -fx-background-radius: 5;
-    -fx-border-radius: 5;
-    -fx-padding: 8px 16px;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-padding: 8px 18px;
     -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(30,58,138,0.3), 8, 0, 0, 3);
 }
 
-/* Efecto al pasar el mouse por el botón */
 .button:hover {
-    -fx-background-color: #4A5568; 
+    -fx-background-color: #2563EB; /* Azul brillante vibrante al pasar el mouse */
+    -fx-effect: dropshadow(three-pass-box, rgba(37,99,235,0.4), 10, 0, 0, 4);
 }
 
-/* Efecto al hacer clic en el botón */
 .button:pressed {
-    -fx-background-color: #1A202C;
+    -fx-background-color: #1E40AF; /* Azul más oscuro al hacer clic */
+    -fx-translate-y: 1px; /* Efecto físico de presionar */
 }
 
 /* =======================================================
-   3. ESTILOS GLOBALES: TABLAS (TableView)
+   3. ESTILOS GLOBALES: TABLAS (Tonos Azul Cielo / Hielo)
    ======================================================= */
 
-/* Diseño limpio para todas las tablas (Reporte, Carrito, Stock) */
 .table-view {
-    -fx-background-color: transparent;
-    -fx-border-color: #E2E8F0;
-    -fx-border-radius: 5;
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #BFDBFE; /* Borde azul muy claro */
+    -fx-border-radius: 6;
 }
 
-/* Cabeceras de la tabla */
 .table-view .column-header-background {
-    -fx-background-color: #EDF2F7;
+    -fx-background-color: #DBEAFE; /* Fondo azul cielo para las cabeceras */
     -fx-background-radius: 5 5 0 0;
 }
 
-.table-view .column-header {
-    -fx-background-color: transparent;
-}
-
 .table-view .column-header .label {
-    -fx-text-fill: #4A5568;
+    -fx-text-fill: #1E3A8A; /* Texto azul oscuro para contraste */
     -fx-font-weight: bold;
-    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
-    -fx-padding: 10px 5px;
+    -fx-padding: 12px 5px;
 }
 
-/* Filas de la tabla */
 .table-row-cell {
     -fx-background-color: #FFFFFF;
-    -fx-border-color: transparent transparent #EDF2F7 transparent;
+    -fx-border-color: transparent transparent #EFF6FF transparent; /* Separador azul fantasma */
     -fx-border-width: 1;
 }
 
 /* Fila seleccionada */
 .table-row-cell:selected {
-    -fx-background-color: #EBF8FF; /* Azul muy clarito */
-    -fx-text-background-color: #2B6CB0; /* Texto azul oscuro al seleccionar */
+    -fx-background-color: #BFDBFE; /* Fila resaltada en azul claro */
+    -fx-text-background-color: #1E3A8A; 
 }
 
 /* =======================================================
    4. ESTILOS GLOBALES: FORMULARIOS (TextFields, ComboBox)
    ======================================================= */
 
-.text-field, .combo-box {
-    -fx-background-color: #FFFFFF;
-    -fx-border-color: #CBD5E0;
+.text-field, .combo-box, .date-picker {
+    -fx-background-color: #F8FAFC; /* Fondo un poco grisáceo frío */
+    -fx-border-color: #93C5FD; /* Borde azul pastel */
     -fx-border-radius: 5;
     -fx-background-radius: 5;
-    -fx-padding: 6px 10px;
+    -fx-padding: 8px 12px;
     -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
 }
 
-/* Efecto cuando el usuario está escribiendo o seleccionando el campo */
-.text-field:focused, .combo-box:focused {
-    -fx-border-color: #3182CE; /* Borde azul al enfocar */
+.text-field:focused, .combo-box:focused, .date-picker:focused {
+    -fx-border-color: #2563EB; /* Borde azul eléctrico al enfocar */
+    -fx-background-color: #FFFFFF;
     -fx-border-width: 2;
     -fx-background-insets: -1;
+    -fx-effect: dropshadow(three-pass-box, rgba(37,99,235,0.2), 5, 0, 0, 0);
+}
+
+/* =======================================================
+   5. FONDO PRINCIPAL (Atmósfera del Sistema)
+   ======================================================= */
+
+.root {
+    /* Un degradado suave de azul hielo a gris muy claro/blanco */
+    -fx-background-color: linear-gradient(to bottom right, #EBF8FF, #F8FAFC, #FFFFFF);
+}
+
+/* Si quieres que el panel superior (donde está el buscador) resalte un poco más, 
+   puedes agregarle una sombra al HBox/VBox de la cabecera desde aquí */
+.top-bar {
+    -fx-background-color: #FFFFFF;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 2);
+}
+
+/* =======================================================
+   6. TIPOGRAFÍA Y TEXTOS (Fuentes modernas y jerarquía)
+   ======================================================= */
+
+/* Aplica la fuente por defecto a toda la ventana para que se vea moderna */
+.root {
+    -fx-font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -fx-background-color: linear-gradient(to bottom right, #EBF8FF, #F8FAFC, #FFFFFF);
+}
+
+/* --- TÍTULO PRINCIPAL --- */
+.titulo-principal {
+    -fx-font-size: 26px;
+    -fx-font-weight: 900; /* Extra negrita para que tenga peso */
+    -fx-text-fill: #2563EB; /* Un Azul Eléctrico muy llamativo y moderno */
+    /* Le damos una sombra muy ligera del mismo color para que "resplandezca" un poco */
+    -fx-effect: dropshadow(two-pass-box, rgba(37, 99, 235, 0.3), 5, 0.0, 0, 2);
+}
+
+/* --- SUBTÍTULOS (Secciones) --- */
+.subtitulo {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #475569; /* Gris pizarra oscuro: elegante y contrasta con el azul */
+}
+
+/* --- ETIQUETAS NORMALES --- */
+.label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #1E293B; /* Texto casi negro para facilitar la lectura */
+}
+
+/* Ajuste al botón para que su texto también crezca un poquito y se vea mejor */
+.button {
+    -fx-font-size: 14px;
+    -fx-background-color: #1E3A8A; 
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-padding: 10px 20px; /* Un poco más gordito para que se vea más pro */
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(30,58,138,0.3), 8, 0, 0, 3);
 }

@@ -14,9 +14,11 @@
    <top>
       <HBox alignment="CENTER_LEFT" spacing="20.0" BorderPane.alignment="CENTER">
          <children>
-            <Label text="CHECKOUT / CONFIRMACIÓN DE PAGO" />
+            <Label styleClass="titulo-principal" text="CHECKOUT / CONFIRMACIÓN DE PAGO" />
             <Region HBox.hgrow="ALWAYS" />
-            <Button text="Volver al Carrito" />
+            
+            <Button text="🔙 Volver al Carrito" />
+            
          </children>
          <padding><Insets bottom="20.0" left="30.0" right="30.0" top="20.0" /></padding>
       </HBox>
@@ -27,7 +29,7 @@
          <children>
             <VBox spacing="15.0" HBox.hgrow="ALWAYS">
                <children>
-                  <Label text="Datos de Facturación / Cliente" />
+                  <Label styleClass="subtitulo" text="Datos de Facturación / Cliente" />
                   <Separator />
                   <VBox spacing="5.0"><Label text="Nombre:" /><TextField /></VBox>
                   <VBox spacing="5.0"><Label text="RFC:" /><TextField /></VBox>
@@ -36,13 +38,21 @@
             </VBox>
             <VBox prefWidth="400.0" spacing="15.0">
                <children>
-                  <Label text="Detalles del Cobro" />
+                  <Label styleClass="subtitulo" text="Detalles del Cobro" />
                   <Separator />
-                  <HBox><Label text="Total a Pagar:" /><Region HBox.hgrow="ALWAYS" /><Label text="0.00" /></HBox>
+                  <HBox>
+                     <Label styleClass="subtitulo" text="Total a Pagar:" />
+                     <Region HBox.hgrow="ALWAYS" />
+                     <Label styleClass="subtitulo" text="\$ 0.00" />
+                  </HBox>
                   <HBox><Label text="Método:" /><Region HBox.hgrow="ALWAYS" /><Label text="Efectivo" /></HBox>
                   <Separator />
                   <VBox spacing="5.0"><Label text="Monto Recibido:" /><TextField /></VBox>
-                  <HBox><Label text="Cambio:" /><Region HBox.hgrow="ALWAYS" /><Label text="0.00" /></HBox>
+                  <HBox>
+                     <Label styleClass="subtitulo" text="Cambio:" />
+                     <Region HBox.hgrow="ALWAYS" />
+                     <Label styleClass="subtitulo" text="\$ 0.00" />
+                  </HBox>
                </children>
             </VBox>
          </children>
@@ -51,7 +61,12 @@
    <bottom>
       <HBox alignment="CENTER_RIGHT" spacing="20.0" BorderPane.alignment="CENTER">
          <padding><Insets bottom="30.0" left="30.0" right="40.0" top="10.0" /></padding>
-         <children><Button text="Cancelar" /><Button text="Confirmar Pago" /></children>
+         <children>
+            
+            <Button text="❌ Cancelar" />
+            <Button text="✅ Confirmar Pago" />
+            
+         </children>
       </HBox>
    </bottom>
 </BorderPane>

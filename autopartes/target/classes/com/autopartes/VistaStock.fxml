@@ -20,18 +20,19 @@
          <children>
             <HBox alignment="CENTER_LEFT" spacing="20.0">
                <children>
-                  <Label text="VISTA STOCK / MAPA DEL ALMACÉN" />
+                  <Label styleClass="titulo-principal" text="VISTA STOCK / MAPA DEL ALMACÉN" />
                   <Region HBox.hgrow="ALWAYS" />
                   
-                  <Button fx:id="btnRegistrarEntrada" onAction="#abrirModalEntrada" text="Registrar Entrada" />
+                  <Button fx:id="btnRegistrarEntrada" onAction="#abrirModalEntrada" text="📦 Registrar Entrada" />
                </children>
             </HBox>
             
             <HBox alignment="CENTER_LEFT" spacing="15.0">
                <children>
                   <Label text="Buscador por IDestante:" />
-                  <TextField fx:id="txtBuscarEstante" promptText="Ej. A1, B4..." prefWidth="200.0" />
-                  <Button onAction="#filtrarPorEstante" text="Filtrar" />
+                  <TextField fx:id="txtBuscarEstante" prefWidth="200.0" promptText="Ej. A1, B4..." />
+                  
+                  <Button onAction="#filtrarPorEstante" text="🔍 Filtrar" />
                </children>
             </HBox>
          </children>
@@ -55,7 +56,7 @@
                         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                      </padding>
                      <children>
-                        <Label text="ESTADO: STOCK BAJO" />
+                        <Label text="ESTADO: STOCK BAJO" textFill="#e11d48" />
                         <HBox alignment="CENTER" prefHeight="160.0">
                            <children>
                               <ImageView fitHeight="140.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
@@ -65,11 +66,11 @@
                               </ImageView>
                            </children>
                         </HBox>
-                        <Label text="Bujía de Iridio Alto Rendimiento" wrapText="true" />
+                        <Label styleClass="subtitulo" text="Bujía de Iridio Alto Rendimiento" wrapText="true" />
                         
-                        <Label text="ID Estante: A1" />
+                        <Label styleClass="subtitulo" text="ID Estante: A1" />
                         <Label text="Nivel / Piso: 2" />
-                        <Label text="Stock Actual: 3" />
+                        <Label styleClass="subtitulo" text="Stock Actual: 3" />
                      </children>
                   </VBox>
 
@@ -78,7 +79,7 @@
                         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                      </padding>
                      <children>
-                        <Label text="ESTADO: STOCK LLENO" />
+                        <Label text="ESTADO: STOCK LLENO" textFill="#16a34a" />
                         <HBox alignment="CENTER" prefHeight="160.0">
                            <children>
                               <ImageView fitHeight="140.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
@@ -88,11 +89,11 @@
                               </ImageView>
                            </children>
                         </HBox>
-                        <Label text="Balatas de Cerámica Delanteras" wrapText="true" />
+                        <Label styleClass="subtitulo" text="Balatas de Cerámica Delanteras" wrapText="true" />
                         
-                        <Label text="ID Estante: B4" />
+                        <Label styleClass="subtitulo" text="ID Estante: B4" />
                         <Label text="Nivel / Piso: 1" />
-                        <Label text="Stock Actual: 50" />
+                        <Label styleClass="subtitulo" text="Stock Actual: 50" />
                      </children>
                   </VBox>
 

@@ -13,58 +13,66 @@
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane prefHeight="700.0" prefWidth="1000.0" stylesheets="@css/estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+   
    <top>
-      <HBox alignment="CENTER" prefHeight="90.0" spacing="20.0">
-         <children>
-            <Button text="☰" />
-            <TextField prefHeight="45.0" promptText="Buscar autopartes, códigos o marcas..." HBox.hgrow="ALWAYS" />
-            <Button prefHeight="45.0" prefWidth="120.0" text="Buscar" />
-         </children>
+      <VBox spacing="15.0" BorderPane.alignment="CENTER">
          <padding>
-            <Insets bottom="10.0" left="40.0" right="40.0" top="10.0" />
+            <Insets bottom="10.0" left="40.0" right="40.0" top="20.0" />
          </padding>
-      </HBox>
+         <children>
+            <Label styleClass="titulo-principal" text="CATÁLOGO DE PRODUCTOS" />
+            
+            <HBox alignment="CENTER" prefHeight="45.0" spacing="20.0">
+               <children>
+                  <Button prefHeight="45.0" text="☰" />
+                  <TextField prefHeight="45.0" promptText="Buscar autopartes, códigos o marcas..." HBox.hgrow="ALWAYS" />
+                  
+                  <Button prefHeight="45.0" prefWidth="120.0" text="🔍 Buscar" />
+                  
+               </children>
+            </HBox>
+         </children>
+      </VBox>
    </top>
+   
    <center>
       <ScrollPane fitToWidth="true" BorderPane.alignment="CENTER">
          <content>
             <FlowPane alignment="TOP_CENTER" hgap="35.0" vgap="40.0">
                <padding>
-                  <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+                  <Insets bottom="40.0" left="40.0" right="40.0" top="30.0" />
                </padding>
                <children>
                   
                   <VBox prefWidth="250.0" spacing="5.0" styleClass="tarjeta-stock-normal">
                      <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
                      <children>
-                        <Label text="NUEVO" />
-                        <HBox alignment="CENTER" prefHeight="160.0">
+                        <Label text="NUEVO" textFill="#2563eb" /> <HBox alignment="CENTER" prefHeight="160.0">
                            <children>
                               <ImageView fitHeight="140.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
                                  <image><Image url="@images/Bujia_AltoRendimiento.jpg" /></image>
                               </ImageView>
                            </children>
                         </HBox>
-                        <Label text="BOSCH" />
+                        <Label styleClass="subtitulo" text="BOSCH" />
                         <Label text="Bujía de Iridio Alto Rendimiento" wrapText="true" />
-                        <Label text="350.00" />
+                        <Label styleClass="subtitulo" text="\$ 350.00" />
                      </children>
                   </VBox>
                   
                   <VBox prefWidth="250.0" spacing="5.0" styleClass="tarjeta-stock-normal">
                      <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
                      <children>
-                        <Label text="OFERTA" />
-                        <HBox alignment="CENTER" prefHeight="160.0">
+                        <Label text="OFERTA" textFill="#e11d48" /> <HBox alignment="CENTER" prefHeight="160.0">
                            <children>
                               <ImageView fitHeight="140.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
                                  <image><Image url="@images/Balatas_ceramica.jpg" /></image>
                               </ImageView>
                            </children>
                         </HBox>
-                        <Label text="BREMBO" />
+                        <Label styleClass="subtitulo" text="BREMBO" />
                         <Label text="Balatas de Cerámica Delanteras" wrapText="true" />
-                        <Label text="1299.00" />
+                        <Label styleClass="subtitulo" text="\$ 1299.00" />
                      </children>
                   </VBox>
                   
@@ -79,9 +87,9 @@
                               </ImageView>
                            </children>
                         </HBox>
-                        <Label text="CASTROL" />
+                        <Label styleClass="subtitulo" text="CASTROL" />
                         <Label text="Aceite Sintético EDGE 5W-30" wrapText="true" />
-                        <Label text="980.00" />
+                        <Label styleClass="subtitulo" text="\$ 980.00" />
                      </children>
                   </VBox>
                   

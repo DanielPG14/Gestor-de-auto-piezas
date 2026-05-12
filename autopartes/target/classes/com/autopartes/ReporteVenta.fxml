@@ -17,9 +17,11 @@
          <children>
             <HBox alignment="CENTER_LEFT">
                <children>
-                  <Label text="REPORTE DE VENTAS" />
+                  <Label styleClass="titulo-principal" text="REPORTE DE VENTAS" />
                   <Region HBox.hgrow="ALWAYS" />
-                  <Button text="Regresar al Menú" />
+                  
+                  <Button text="🏠 Regresar al Menú" />
+                  
                </children>
             </HBox>
          </children>
@@ -33,9 +35,11 @@
                <children>
                   <Label text="Desde:" /><DatePicker />
                   <Label text="Hasta:" /><DatePicker />
-                  <Button text="Filtrar" />
+                  
+                  <Button text="🔍 Filtrar" />
                   <Region HBox.hgrow="ALWAYS" />
-                  <Button text="Exportar a PDF" />
+                  <Button text="📄 Exportar a PDF" />
+                  
                </children>
             </HBox>
             <TableView VBox.vgrow="ALWAYS">
@@ -50,7 +54,8 @@
             </TableView>
             <HBox alignment="CENTER_RIGHT" spacing="10.0">
                <children>
-                  <Label text="TOTAL ACUMULADO:" /><Label text="0.00" />
+                  <Label styleClass="subtitulo" text="TOTAL ACUMULADO:" />
+                  <Label styleClass="subtitulo" text="\$ 0.00" />
                </children>
                <padding><Insets bottom="10.0" top="10.0" /></padding>
             </HBox>
