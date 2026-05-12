@@ -1,7 +1,10 @@
+com\autopartes\Modelo\Estante.class
 com\autopartes\SystemInfo.class
 com\autopartes\Controlador\prueba.class
 com\autopartes\Modelo\PiezaDAO.class
 com\autopartes\Modelo\Pieza.class
 module-info.class
+com\autopartes\Modelo\Transacciones.class
+com\autopartes\Modelo\EstanteDAO.class
 com\autopartes\App.class
 com\autopartes\Modelo\Conexion.class
