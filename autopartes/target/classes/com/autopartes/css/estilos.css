@@ -1,0 +1,125 @@
+/* =======================================================
+   HOJA DE ESTILOS GLOBAL - SISTEMA DE AUTOPARTES
+   ======================================================= */
+
+/* =======================================================
+   1. TARJETAS DE INVENTARIO (VISTA STOCK / CATÁLOGO)
+   ======================================================= */
+
+/* Tarjeta normal / Stock bueno */
+.tarjeta-stock-normal {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    /* Una sombra sutil para dar profundidad */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 3);
+}
+
+/* Alerta Roja: Stock menor a 5 */
+.tarjeta-stock-alerta {
+    -fx-background-color: #FFF5F5; 
+    -fx-border-color: #FF4D4D;     
+    -fx-border-width: 2;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(three-pass-box, rgba(255,77,77,0.15), 10, 0, 0, 3);
+}
+
+/* Alerta Verde: Stock lleno */
+.tarjeta-stock-lleno {
+    -fx-background-color: #F0FFF4; 
+    -fx-border-color: #48BB78;     
+    -fx-border-width: 2;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(three-pass-box, rgba(72,187,120,0.15), 10, 0, 0, 3);
+}
+
+/* =======================================================
+   2. ESTILOS GLOBALES: BOTONES
+   ======================================================= */
+
+/* Botón por defecto (Botón principal) */
+.button {
+    -fx-background-color: #2D3748; /* Gris oscuro elegante */
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: bold;
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+}
+
+/* Efecto al pasar el mouse por el botón */
+.button:hover {
+    -fx-background-color: #4A5568; 
+}
+
+/* Efecto al hacer clic en el botón */
+.button:pressed {
+    -fx-background-color: #1A202C;
+}
+
+/* =======================================================
+   3. ESTILOS GLOBALES: TABLAS (TableView)
+   ======================================================= */
+
+/* Diseño limpio para todas las tablas (Reporte, Carrito, Stock) */
+.table-view {
+    -fx-background-color: transparent;
+    -fx-border-color: #E2E8F0;
+    -fx-border-radius: 5;
+}
+
+/* Cabeceras de la tabla */
+.table-view .column-header-background {
+    -fx-background-color: #EDF2F7;
+    -fx-background-radius: 5 5 0 0;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #4A5568;
+    -fx-font-weight: bold;
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-padding: 10px 5px;
+}
+
+/* Filas de la tabla */
+.table-row-cell {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: transparent transparent #EDF2F7 transparent;
+    -fx-border-width: 1;
+}
+
+/* Fila seleccionada */
+.table-row-cell:selected {
+    -fx-background-color: #EBF8FF; /* Azul muy clarito */
+    -fx-text-background-color: #2B6CB0; /* Texto azul oscuro al seleccionar */
+}
+
+/* =======================================================
+   4. ESTILOS GLOBALES: FORMULARIOS (TextFields, ComboBox)
+   ======================================================= */
+
+.text-field, .combo-box {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #CBD5E0;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-padding: 6px 10px;
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+/* Efecto cuando el usuario está escribiendo o seleccionando el campo */
+.text-field:focused, .combo-box:focused {
+    -fx-border-color: #3182CE; /* Borde azul al enfocar */
+    -fx-border-width: 2;
+    -fx-background-insets: -1;
+}
