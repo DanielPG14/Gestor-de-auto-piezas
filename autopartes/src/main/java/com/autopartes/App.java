@@ -13,7 +13,7 @@ public class App extends Application {
     public void start(Stage stage) throws IOException {
         // Cargamos el archivo FXML desde la carpeta de recursos
         // Asegúrate de que el nombre coincida exactamente (ej: pantalla.fxml)
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/autopartes/CatalogoVendedor.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/autopartes/VistaStockAlm.fxml"));
         
         Parent root = loader.load();
         Scene scene = new Scene(root);

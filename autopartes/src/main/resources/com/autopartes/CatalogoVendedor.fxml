@@ -15,8 +15,8 @@
       <HBox alignment="CENTER" prefHeight="90.0" spacing="20.0">
          <children>
             <Button text="☰" />
-            <TextField prefHeight="45.0" promptText="Buscar autopartes, códigos o marcas..." HBox.hgrow="ALWAYS" />
-            <Button prefHeight="45.0" prefWidth="120.0" text="Buscar" />
+            <TextField fx:id="txtBuscarGeneral" prefHeight="45.0" promptText="Buscar autopartes por nombre, ID o estante..." HBox.hgrow="ALWAYS" />
+            <Button onAction="#filtrarCatalogo" prefHeight="45.0" prefWidth="120.0" text="Buscar" />
          </children>
          <padding>
             <Insets bottom="10.0" left="40.0" right="40.0" top="10.0" />
