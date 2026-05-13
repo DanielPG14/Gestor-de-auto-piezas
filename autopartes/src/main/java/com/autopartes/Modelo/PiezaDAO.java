@@ -39,32 +39,31 @@ public class PiezaDAO {
     }
 
     public boolean registrarNuevaPieza(Pieza pieza) {
-        // Query de inserción mapeando los campos exactos de tu tabla Piezas
+        // Define la consulta SQL para insertar una nueva pieza, con los campos necesarios
         String sql = "INSERT INTO Piezas (nombre, PrecioActual, imagen, stock, IDestante, nivelAsigned) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
-
+                "VALUES (?, ?, ?, ?, ?, ?)"; // "?" es un placeholder para los parámetros que se pasarán
+        // Conexión a la base de datos y preparación de la consulta
         try (Connection db = Conexion.getInstancia();
-                PreparedStatement ps = db.prepareStatement(sql)) {
+                PreparedStatement ps = db.prepareStatement(sql)) { //preparar la consulta con los parámetros
 
-            // Pasamos los parámetros desde el objeto Pieza
-            ps.setString(1, pieza.getNombre());
-            ps.setDouble(2, pieza.getPrecioActual());
+            //Se pasan los parámetros desde el objeto definido en Pieza.java
+            ps.setString(1, pieza.getNombre()); //nombre pieza
+            ps.setDouble(2, pieza.getPrecioActual()); //precio pieza
 
-            // Si no manejan imagen aún desde el formulario, le seteamos una por defecto o
-            // null
+            //manejador de la imagen, por defecto default
             if (pieza.getImagen() != null && !pieza.getImagen().isEmpty()) {
-                ps.setString(3, pieza.getImagen());
+                ps.setString(3, pieza.getImagen()); //ruta
             } else {
-                ps.setString(3, "default.jpg");
+                ps.setString(3, "default.jpg"); //default
             }
 
-            ps.setInt(4, pieza.getStock());
-            ps.setInt(5, Integer.parseInt(pieza.getIdEstante())); // Convertimos el ID de String a INT para la FK
-            ps.setInt(6, pieza.getNivelAsigned());
+            ps.setInt(4, pieza.getStock()); // Stock inicial
+            ps.setInt(5, Integer.parseInt(pieza.getIdEstante())); // ID de String a INT para la FK
+            ps.setInt(6, pieza.getNivelAsigned()); // Piso estante
 
             // Ejecutamos la consulta. Retorna true si se insertó correctamente
-            int filasAfectadas = ps.executeUpdate();
-            return filasAfectadas > 0;
+            int filasAfectadas = ps.executeUpdate(); //retorna filas afectadas
+            return filasAfectadas > 0; // Si se afectó al menos una fila, la inserción fue exitosa
 
         } catch (SQLException e) {
             System.err.println("Error SQL al registrar pieza en PiezaDAO: " + e.getMessage());
