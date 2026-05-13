@@ -32,7 +32,7 @@ public class LoginC {
             Sesion.setUsuario(u);
             System.out.println("VINCULACIÓN EXITOSA: " + Sesion.getUsuario().getUsername());
             try {
-                Parent root = FXMLLoader.load(getClass().getResource("/com/autopartes/vistas/CatalogoVendedor.fxml"));
+                Parent root = FXMLLoader.load(getClass().getResource("/com/autopartes/CatalogoVendedor.fxml"));
 
                 Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 
