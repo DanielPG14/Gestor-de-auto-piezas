@@ -1,5 +1,7 @@
 com\autopartes\Controlador\CatalogoC.class
+com\autopartes\Controlador\StockC.class
 com\autopartes\Modelo\PiezaDAO.class
+com\autopartes\Controlador\AgregarPiezaC.class
 module-info.class
 com\autopartes\Modelo\Transacciones.class
 com\autopartes\Modelo\Conexion.class
@@ -11,5 +13,6 @@ com\autopartes\Controlador\LoginC.class
 com\autopartes\Controlador\prueba.class
 com\autopartes\Modelo\Pieza.class
 com\autopartes\Modelo\Usuario.class
+com\autopartes\Controlador\StockC$1.class
 com\autopartes\Modelo\EstanteDAO.class
 com\autopartes\App.class

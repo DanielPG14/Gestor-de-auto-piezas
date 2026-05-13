@@ -26,6 +26,7 @@
                   <Label text="Buscador general:" />
                   <TextField fx:id="txtBuscarGeneral" prefWidth="300.0" promptText="Buscar por nombre, ID o estante..." />
                   <Button onAction="#filtrarStock" text="Filtrar" />
+                  <Button fx:id="btnAgregarPieza" onAction="#abrirModalAgregar" style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;" text="+ Agregar Nueva Pieza" />
                </children>
             </HBox>
          </children>
