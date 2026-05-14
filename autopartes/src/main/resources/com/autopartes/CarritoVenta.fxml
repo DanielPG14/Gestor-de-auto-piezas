@@ -12,12 +12,15 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="700.0" prefWidth="1000.0" stylesheets="@css/estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane prefHeight="700.0" prefWidth="1000.0" stylesheets="@css/estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.autopartes.Controlador.CarritoC">
    <top>
       <HBox alignment="CENTER_LEFT" spacing="20.0" BorderPane.alignment="CENTER">
          <children>
             <Label text="CARRITO DE COMPRAS" />
             <Region HBox.hgrow="ALWAYS" />
+            
+            <Button onAction="#volverCatalogo" text="Regresar" />
+            
          </children>
          <padding><Insets bottom="20.0" left="30.0" right="30.0" top="20.0" /></padding>
       </HBox>
@@ -69,7 +72,9 @@
                </children>
                <VBox.margin><Insets bottom="10.0" /></VBox.margin>
             </VBox>
-            <Button maxWidth="1.7976931348623157E308" text="Generar Ticket / Pagar" />
+            
+            <Button maxWidth="1.7976931348623157E308" onAction="#irACheckout" text="Generar Ticket / Pagar" />
+            
             <Button maxWidth="1.7976931348623157E308" text="Vaciar Carrito" />
          </children>
          <padding><Insets bottom="30.0" left="15.0" right="30.0" /></padding>

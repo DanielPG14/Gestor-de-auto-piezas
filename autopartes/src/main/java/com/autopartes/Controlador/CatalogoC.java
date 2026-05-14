@@ -2,6 +2,8 @@ package com.autopartes.Controlador;
 
 import com.autopartes.Modelo.PiezaDAO;
 import com.autopartes.Modelo.Pieza;
+import com.autopartes.Modelo.Sesion; // Importante para cerrar sesión
+import javafx.event.ActionEvent; // Importante para los clics del menú
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -39,8 +41,7 @@ public class CatalogoC {
         });
     }
 
-    // Método intermedio que limpia y redibuja las tarjetas basadas en una lista
-    // específica
+    // Método intermedio que limpia y redibuja las tarjetas basadas en una lista específica
     private void renderizarCatalogo(List<Pieza> listaAProcesar) {
         panelProductos.getChildren().clear();
         for (Pieza p : listaAProcesar) {
@@ -56,8 +57,7 @@ public class CatalogoC {
             return;
         }
 
-        String filtro = textoBusqueda.toLowerCase().trim();// Conversion a Min y quitar space para evitar problemas de
-                                                           // búsqueda
+        String filtro = textoBusqueda.toLowerCase().trim(); // Conversion a Min y quitar space para evitar problemas de búsqueda
         List<Pieza> listaFiltrada = new ArrayList<>(); // Lista temporal para resultados filtrados
 
         // Recorremos la lista maestra y aplicamos el filtro
@@ -67,7 +67,7 @@ public class CatalogoC {
                     String.valueOf(p.getIdPieza()).contains(filtro) ||
                     p.getIdEstante().toLowerCase().contains(filtro)) {
 
-                listaFiltrada.add(p);// Si coincide con alguno de los criterios, se agrega a la lista filtrada
+                listaFiltrada.add(p); // Si coincide con alguno de los criterios, se agrega a la lista filtrada
             }
         }
 
@@ -81,8 +81,7 @@ public class CatalogoC {
         ejecutarFiltro(txtBuscarGeneral.getText());
     }
 
-    // Método para crear una tarjeta visual de cada pieza, con su imagen, nombre,
-    // precio y estado
+    // Método para crear una tarjeta visual de cada pieza, con su imagen, nombre, precio y estado
     private VBox crearTarjeta(Pieza p) {
         VBox vbox = new VBox(5);
         vbox.setPrefWidth(250);
@@ -100,17 +99,16 @@ public class CatalogoC {
         img.setFitWidth(200);
         img.setPreserveRatio(true);
 
-        // Metodo para cargar imagen por defecto y no romper sisterma
+        // Metodo para cargar imagen por defecto y no romper sistema
         try {
             String rutaImagen = p.getImagen();
 
             // Valida si es URL o local
             if (rutaImagen != null && (rutaImagen.startsWith("http://") || rutaImagen.startsWith("https://"))) {
                 // Pasamos la URL directamente, JavaFX la descarga sola en segundo plano
-                img.setImage(new Image(rutaImagen, true)); // El 'true' activa la carga asíncrona para que la app no se
-                                                           // trabe
+                img.setImage(new Image(rutaImagen, true)); // El 'true' activa la carga asíncrona para que la app no se trabe
             } else {
-                //busca en local
+                // busca en local
                 String nombreArchivo = (rutaImagen != null && !rutaImagen.isEmpty()) ? rutaImagen : "default.jpg";
                 String rutaImgLocal = "/com/autopartes/vistas/images/" + nombreArchivo;
                 // carga la imagen desde el recurso local
@@ -141,5 +139,39 @@ public class CatalogoC {
         vbox.getChildren().addAll(lblStatus, hbImagen, lblMarca, lblNombre, lblPrecio);
 
         return vbox;
+    }
+
+    // ====================================================================
+    // MÉTODOS DE NAVEGACIÓN DEL MENÚ HAMBURGUESA
+    // ====================================================================
+
+    @FXML
+    private void irACatalogo(ActionEvent event) {
+        GestorVistas.cambiarVista("CatalogoVendedor.fxml");
+    }
+
+    @FXML
+    private void irAStock(ActionEvent event) {
+        GestorVistas.cambiarVista("VistaStock.fxml");
+    }
+
+    @FXML
+    private void irACarrito(ActionEvent event) {
+        GestorVistas.cambiarVista("CarritoVenta.fxml");
+    }
+
+    @FXML
+    private void irAReporte(ActionEvent event) {
+        GestorVistas.cambiarVista("ReporteVenta.fxml");
+    }
+
+    @FXML
+    private void cerrarSesion(ActionEvent event) {
+        // Limpiamos los datos del usuario en la memoria
+        Sesion.limpiarSesion();
+        System.out.println("Sesión cerrada correctamente.");
+        
+        // Lo regresamos a la pantalla de Login
+        GestorVistas.cambiarVista("Login.fxml");
     }
 }

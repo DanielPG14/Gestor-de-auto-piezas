@@ -1,16 +1,9 @@
 package com.autopartes.Controlador;
 
-import java.io.IOException;
-
 import com.autopartes.Modelo.*;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.stage.Stage;
 import javafx.event.ActionEvent;
-import javafx.scene.Node;
 
 public class LoginC {
     @FXML
@@ -27,26 +20,43 @@ public class LoginC {
         String user = txtUser.getText();
         String pass = txtPass.getText();
 
+        // 1. Validamos las credenciales en la base de datos
         Usuario u = dao.login(user, pass);
+        
         if (u != null) {
+            // 2. Guardamos el objeto completo en nuestra clase Sesion
             Sesion.setUsuario(u);
             System.out.println("VINCULACIÓN EXITOSA: " + Sesion.getUsuario().getUsername());
-            try {
-                Parent root = FXMLLoader.load(getClass().getResource("/com/autopartes/CatalogoVendedor.fxml"));
-
-                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-
-                Scene scene = new Scene(root);
-                stage.setScene(scene);
-                stage.setTitle("Panel Principal - " + u.getRol()); // Título dinámico
-                stage.show();
-
-            } catch (IOException e) {
-                lblError.setText("Error al cargar la ventana principal.");
-                e.printStackTrace();
+            
+            // 3. Obtenemos el rol y lo limpiamos de posibles espacios invisibles
+            String rol = u.getRol().trim();
+            
+            // 4. Delegamos la navegación al Gestor de Vistas según el rol
+            switch (rol) {
+                case "Cajero":
+                    // El cajero va directo a vender
+                    GestorVistas.cambiarVista("CatalogoVendedor.fxml");
+                    break;
+                    
+                case "Almacenista":
+                    // El almacenista va a gestionar el inventario
+                    GestorVistas.cambiarVista("VistaStockAlm.fxml");
+                    break;
+                    
+                case "Vendedor":
+                    // El vendedor va a ver las listas generadas
+                    GestorVistas.cambiarVista("ListaGenerada.fxml"); 
+                    break;
+                    
+                default:
+                    // Si por algún motivo tiene un rol extraño en la base de datos
+                    lblError.setText("Error: Rol no reconocido en el sistema (" + rol + ").");
+                    break;
             }
+
         } else {
-            lblError.setText("Error: Usuario no encontrado.");
+            // Si el usuario no existe o la contraseña está mal
+            lblError.setText("Error: Usuario o contraseña incorrectos.");
         }
     }
 }

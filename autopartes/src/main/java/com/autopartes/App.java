@@ -1,26 +1,22 @@
 package com.autopartes;
 
+import com.autopartes.Controlador.GestorVistas; // Importamos nuestro gestor
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
-import java.io.IOException;
 
 public class App extends Application {
 
     @Override
-    public void start(Stage stage) throws IOException {
-        // Cargamos el archivo FXML desde la carpeta de recursos
-        // Asegúrate de que el nombre coincida exactamente (ej: pantalla.fxml)
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/autopartes/Login.fxml"));
+    public void start(Stage stage) {
+        // 1. Le entregamos la ventana principal a nuestro Gestor para que no arroje NullPointerException
+        GestorVistas.setVentanaPrincipal(stage);
         
-        Parent root = loader.load();
-        Scene scene = new Scene(root);
+        // 2. Configuraciones generales de la ventana
+        stage.setTitle("Gestor de Auto-Piezas - Inicio de Sesión");
+        stage.setResizable(true);
         
-        stage.setTitle("Inicio de Sesión");
-        stage.setScene(scene);
-        stage.show();
+        // 3. Le decimos al gestor que arranque el programa abriendo el Login
+        GestorVistas.cambiarVista("Login.fxml");
     }
 
     public static void main(String[] args) {
