@@ -9,12 +9,25 @@
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 
 <BorderPane prefHeight="700.0" prefWidth="1000.0" stylesheets="@css/estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.autopartes.Controlador.CatalogoC">
    <top>
       <HBox alignment="CENTER" prefHeight="90.0" spacing="20.0">
          <children>
-            <Button text="☰" />
+            <MenuButton prefHeight="45.0" styleClass="menu-hamburguesa" text="☰">
+               <items>
+                  <MenuItem onAction="#irACatalogo" text="Catálogo" />
+                  <MenuItem onAction="#irAStock" text="Mapa de Almacén" />
+                  <MenuItem onAction="#irACarrito" text="Carrito de Compras" />
+                  <MenuItem onAction="#irAReporte" text="Reporte de Ventas" />
+                  <SeparatorMenuItem />
+                  <MenuItem onAction="#cerrarSesion" text="Cerrar Sesión" />
+               </items>
+            </MenuButton>
+            
             <TextField fx:id="txtBuscarGeneral" prefHeight="45.0" promptText="Buscar autopartes por nombre, ID o estante..." HBox.hgrow="ALWAYS" />
             <Button onAction="#filtrarCatalogo" prefHeight="45.0" prefWidth="120.0" text="Buscar" />
          </children>
@@ -31,7 +44,7 @@
                   <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
                </padding>
                <children>
-                  </children>
+               </children>
             </FlowPane>
          </content>
       </ScrollPane>

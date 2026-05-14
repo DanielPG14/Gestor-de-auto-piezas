@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="600.0" prefWidth="900.0" stylesheets="@css/estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane prefHeight="600.0" prefWidth="900.0" stylesheets="@css/estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.autopartes.Controlador.ReporteC">
    <top>
       <VBox spacing="10.0" BorderPane.alignment="CENTER">
          <children>
@@ -19,7 +19,9 @@
                <children>
                   <Label text="REPORTE DE VENTAS" />
                   <Region HBox.hgrow="ALWAYS" />
-                  <Button text="Regresar al Menú" />
+                  
+                  <Button onAction="#volverCatalogo" text="Regresar" />
+                  
                </children>
             </HBox>
          </children>

@@ -5,6 +5,7 @@ import com.autopartes.Modelo.PiezaDAO;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -17,6 +18,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
 
 import java.util.List;
 
@@ -51,6 +53,12 @@ public class StockC {
         configurarSemaforo();
         cargarDatos();
         configurarFiltro();
+    }
+
+    @FXML
+    private void volverCatalogo(ActionEvent event) {
+        // Usamos el gestor para regresar
+        GestorVistas.cambiarVista("CatalogoVendedor.fxml");
     }
 
     private void configurarColumnas() {
