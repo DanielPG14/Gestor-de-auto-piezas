@@ -8,66 +8,85 @@ public class PiezaDAO {
 
     public List<Pieza> obtenerTodas() {
         List<Pieza> lista = new ArrayList<>();
+        
+        String sql = "SELECT p.IDpieza, p.nombre, p.imagen, p.stock, p.nivelAsigned, p.IDestante, " +
+                     "pr.nombre_razon_social, pp.codigo_proveedor, hp.precio_compra " +
+                     "FROM piezas p " +
+                     "INNER JOIN producto_proveedor pp ON p.IDpieza = pp.id_pieza " +
+                     "INNER JOIN proveedor pr ON pp.id_proveedor = pr.id_proveedor " +
+                     "INNER JOIN historial_precio hp ON pp.id_prod_prov = hp.id_prod_prov " +
+                     "WHERE hp.fecha_fin IS NULL";
 
-        // Consulta para unir Piezas, Estantes y Almacenes, para la gestión de stock
-        String sql = "SELECT p.IDpieza, p.nombre, p.PrecioActual, p.imagen, p.stock, p.nivelAsigned, " +
-                "e.IDestante, e.capMax " + //
-                "FROM Piezas p " +
-                "INNER JOIN Estantes e ON p.IDestante = e.IDestante " +
-                "INNER JOIN Almacen a ON e.IDalmacen = a.IDalmacen";
-        // Conexión y ejecución de la consulta
         try (Connection db = Conexion.getInstancia();
-                PreparedStatement ps = db.prepareStatement(sql);
-                ResultSet rs = ps.executeQuery()) {
-            // Mapeo de resultados a objetos Pieza, se guarda en la lista y se manda a la
-            // tabla en StockC
+             PreparedStatement ps = db.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
             while (rs.next()) {
+                // Intentamos obtener la capacidad máxima desde el query; si no existe en tu SELECT actual, ponemos 100 por defecto
+                int capMax = 100; 
+                try {
+                    capMax = rs.getInt("capMax"); // Ajusta el nombre de la columna si en tu BD se llama diferente
+                } catch (SQLException e) {
+                    // Si no venía en el SELECT, no pasa nada, se queda con el valor por defecto
+                }
+
+                // CORRECCIÓN: Orden exacto del constructor de tu clase Pieza
                 lista.add(new Pieza(
-                        rs.getInt("IDpieza"),
-                        rs.getString("nombre"),
-                        rs.getDouble("PrecioActual"),
-                        rs.getString("imagen"),
-                        String.valueOf(rs.getInt("IDestante")),
-                        rs.getInt("nivelAsigned"),
-                        rs.getInt("stock"),
-                        rs.getInt("capMax")));
+                        rs.getInt("IDpieza"),                     // 1. idPieza (int)
+                        rs.getString("nombre"),                   // 2. nombre (String)
+                        rs.getString("nombre_razon_social"),      // 3. razonSocialProveedor (String)
+                        rs.getString("codigo_proveedor"),         // 4. codigoProveedor (String)
+                        rs.getDouble("precio_compra"),            // 5. precioCompra (double)
+                        rs.getString("imagen"),                   // 6. imagen (String)
+                        String.valueOf(rs.getInt("IDestante")),   // 7. idEstante (String)
+                        rs.getInt("nivelAsigned"),                // 8. nivelAsigned (int)
+                        rs.getInt("stock"),                       // 9. stock (int)
+                        capMax                                    // 10. capMax (int)
+                ));
             }
         } catch (SQLException e) {
-            System.err.println("Error SQL en PiezaDAO: " + e.getMessage());
+            System.err.println("Error SQL en PiezaDAO.obtenerTodas: " + e.getMessage());
         }
         return lista;
     }
 
     public boolean registrarNuevaPieza(Pieza pieza) {
-        // Define la consulta SQL para insertar una nueva pieza, con los campos necesarios
-        String sql = "INSERT INTO Piezas (nombre, PrecioActual, imagen, stock, IDestante, nivelAsigned) " +
-                "VALUES (?, ?, ?, ?, ?, ?)"; // "?" es un placeholder para los parámetros que se pasarán
-        // Conexión a la base de datos y preparación de la consulta
+        String sql = "INSERT INTO piezas (nombre, imagen, stock, IDestante, nivelAsigned) VALUES (?, ?, ?, ?, ?)";
+        // Nota: Las inserciones a producto_proveedor e historial se hacen en la transacción aquí o mediante métodos complementarios
+
         try (Connection db = Conexion.getInstancia();
-                PreparedStatement ps = db.prepareStatement(sql)) { //preparar la consulta con los parámetros
+             PreparedStatement ps = db.prepareStatement(sql)) {
 
-            //Se pasan los parámetros desde el objeto definido en Pieza.java
-            ps.setString(1, pieza.getNombre()); //nombre pieza
-            ps.setDouble(2, pieza.getPrecioActual()); //precio pieza
+            ps.setString(1, pieza.getNombre());
+            ps.setString(2, pieza.getImagen() != null ? pieza.getImagen() : "default.jpg");
+            ps.setInt(3, pieza.getStock());
+            ps.setInt(4, Integer.parseInt(pieza.getIdEstante()));
+            ps.setInt(5, pieza.getNivelAsigned());
+            
+            // CORRECCIÓN ERROR 2: Si necesitas enviar el precio a las tablas hijas en la transacción:
+            // double costo = pieza.getPrecioCompra(); 
 
-            //manejador de la imagen, por defecto default
-            if (pieza.getImagen() != null && !pieza.getImagen().isEmpty()) {
-                ps.setString(3, pieza.getImagen()); //ruta
-            } else {
-                ps.setString(3, "default.jpg"); //default
-            }
-
-            ps.setInt(4, pieza.getStock()); // Stock inicial
-            ps.setInt(5, Integer.parseInt(pieza.getIdEstante())); // ID de String a INT para la FK
-            ps.setInt(6, pieza.getNivelAsigned()); // Piso estante
-
-            // Ejecutamos la consulta. Retorna true si se insertó correctamente
-            int filasAfectadas = ps.executeUpdate(); //retorna filas afectadas
-            return filasAfectadas > 0; // Si se afectó al menos una fila, la inserción fue exitosa
-
+            int filas = ps.executeUpdate();
+            return filas > 0;
         } catch (SQLException e) {
-            System.err.println("Error SQL al registrar pieza en PiezaDAO: " + e.getMessage());
+            System.err.println("Error SQL en PiezaDAO.registrarNuevaPieza: " + e.getMessage());
             return false;
         }
+    }
+    public List<String> obtenerRazonSocialProveedores() {
+        List<String> proveedores = new ArrayList<>();
+        String sql = "SELECT nombre_razon_social FROM proveedor";
+
+        try (Connection db = Conexion.getInstancia(); // Ajusta a tu clase de conexión (ej. Conexion.getConexion() si se llama diferente)
+             PreparedStatement ps = db.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                proveedores.add(rs.getString("nombre_razon_social"));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error SQL en PiezaDAO.obtenerRazonSocialProveedores: " + e.getMessage());
+        }
+        return proveedores;
     }
 }

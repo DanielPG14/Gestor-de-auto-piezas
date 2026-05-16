@@ -1,4 +1,6 @@
+D:\Codigo\Proyecto\Gestor-de-auto-piezas\autopartes\src\main\java\com\autopartes\Controlador\CheckoutC.java
 D:\Codigo\Proyecto\Gestor-de-auto-piezas\autopartes\src\main\java\com\autopartes\Modelo\Pieza.java
+D:\Codigo\Proyecto\Gestor-de-auto-piezas\autopartes\src\main\java\com\autopartes\Controlador\ReporteC.java
 D:\Codigo\Proyecto\Gestor-de-auto-piezas\autopartes\src\main\java\com\autopartes\Controlador\prueba.java
 D:\Codigo\Proyecto\Gestor-de-auto-piezas\autopartes\src\main\java\com\autopartes\Modelo\UsuarioDAO.java
 D:\Codigo\Proyecto\Gestor-de-auto-piezas\autopartes\src\main\java\com\autopartes\Modelo\EstanteDAO.java
@@ -6,9 +8,11 @@ D:\Codigo\Proyecto\Gestor-de-auto-piezas\autopartes\src\main\java\com\autopartes
 D:\Codigo\Proyecto\Gestor-de-auto-piezas\autopartes\src\main\java\com\autopartes\Controlador\StockC.java
 D:\Codigo\Proyecto\Gestor-de-auto-piezas\autopartes\src\main\java\com\autopartes\Controlador\LoginC.java
 D:\Codigo\Proyecto\Gestor-de-auto-piezas\autopartes\src\main\java\com\autopartes\Modelo\PiezaDAO.java
+D:\Codigo\Proyecto\Gestor-de-auto-piezas\autopartes\src\main\java\com\autopartes\Controlador\CarritoC.java
 D:\Codigo\Proyecto\Gestor-de-auto-piezas\autopartes\src\main\java\com\autopartes\Modelo\Sesion.java
 D:\Codigo\Proyecto\Gestor-de-auto-piezas\autopartes\src\main\java\com\autopartes\Modelo\Usuario.java
 D:\Codigo\Proyecto\Gestor-de-auto-piezas\autopartes\src\main\java\com\autopartes\Controlador\CatalogoC.java
+D:\Codigo\Proyecto\Gestor-de-auto-piezas\autopartes\src\main\java\com\autopartes\Controlador\GestorVistas.java
 D:\Codigo\Proyecto\Gestor-de-auto-piezas\autopartes\src\main\java\com\autopartes\Modelo\Estante.java
 D:\Codigo\Proyecto\Gestor-de-auto-piezas\autopartes\src\main\java\com\autopartes\Controlador\AgregarPiezaC.java
 D:\Codigo\Proyecto\Gestor-de-auto-piezas\autopartes\src\main\java\com\autopartes\Modelo\Conexion.java

@@ -8,14 +8,11 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
-        // 1. Le entregamos la ventana principal a nuestro Gestor para que no arroje NullPointerException
         GestorVistas.setVentanaPrincipal(stage);
         
-        // 2. Configuraciones generales de la ventana
         stage.setTitle("Gestor de Auto-Piezas - Inicio de Sesión");
         stage.setResizable(true);
         
-        // 3. Le decimos al gestor que arranque el programa abriendo el Login
         GestorVistas.cambiarVista("Login.fxml");
     }
 

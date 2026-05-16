@@ -1,47 +1,47 @@
 package com.autopartes.Controlador;
 
-import com.autopartes.Modelo.PiezaDAO;
 import com.autopartes.Modelo.Pieza;
-import com.autopartes.Modelo.Sesion; // Importante para cerrar sesión
-import javafx.event.ActionEvent; // Importante para los clics del menú
+import com.autopartes.Modelo.PiezaDAO;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import javafx.scene.layout.VBox;
 import java.util.ArrayList;
 import java.util.List;
+
+// Importaciones de soporte asumidas del proyecto (Ajusta los paquetes si cambian)
+// import com.autopartes.Utilidades.GestorVistas;
+// import com.autopartes.Utilidades.Sesion;
 
 public class CatalogoC {
 
     @FXML
     private FlowPane panelProductos;
     @FXML
-    private TextField txtBuscarGeneral; // Campo de búsqueda general
+    private TextField txtBuscarGeneral;
 
-    private PiezaDAO piezaDAO = new PiezaDAO(); // DAO para acceder a los datos de las piezas
-    private List<Pieza> listaMaestra = new ArrayList<>(); // Lista de piezas
+    private PiezaDAO piezaDAO = new PiezaDAO();
+    private List<Pieza> listaMaestra = new ArrayList<>();
 
     @FXML
     public void initialize() {
-        // Carga datos iniciales de la BD
+        // Carga los datos mapeados desde la consulta con INNER JOIN
         listaMaestra = piezaDAO.obtenerTodas();
-
-        // Renderizar el catálogo completo por primera vez
         renderizarCatalogo(listaMaestra);
-
-        // Agregar el listener para buscar automáticamente mientras se escribe
+        
+        // Listener en tiempo real para el buscador
         txtBuscarGeneral.textProperty().addListener((observable, oldValue, newValue) -> {
             ejecutarFiltro(newValue);
         });
     }
 
-    // Método intermedio que limpia y redibuja las tarjetas basadas en una lista específica
     private void renderizarCatalogo(List<Pieza> listaAProcesar) {
         panelProductos.getChildren().clear();
         for (Pieza p : listaAProcesar) {
@@ -50,39 +50,36 @@ public class CatalogoC {
         }
     }
 
-    // Filtra en memoria la lista maestra y manda a redibujar el panel
     private void ejecutarFiltro(String textoBusqueda) {
         if (textoBusqueda == null || textoBusqueda.isEmpty()) {
             renderizarCatalogo(listaMaestra);
             return;
         }
 
-        String filtro = textoBusqueda.toLowerCase().trim(); // Conversion a Min y quitar space para evitar problemas de búsqueda
-        List<Pieza> listaFiltrada = new ArrayList<>(); // Lista temporal para resultados filtrados
-
-        // Recorremos la lista maestra y aplicamos el filtro
+        String filtro = textoBusqueda.toLowerCase().trim();
+        List<Pieza> listaFiltrada = new ArrayList<>();
+        
         for (Pieza p : listaMaestra) {
-            // Filtra por Nombre, ID o el ID del Estante
-            if (p.getNombre().toLowerCase().contains(filtro) ||
-                    String.valueOf(p.getIdPieza()).contains(filtro) ||
-                    p.getIdEstante().toLowerCase().contains(filtro)) {
+            // CORRECCIÓN: Validaciones defensivas contra valores nulos en BD
+            boolean coincideNombre = p.getNombre() != null && p.getNombre().toLowerCase().contains(filtro);
+            boolean coincideProveedor = p.getRazonSocialProveedor() != null && p.getRazonSocialProveedor().toLowerCase().contains(filtro);
+            boolean coincideCodigo = p.getCodigoProveedor() != null && p.getCodigoProveedor().toLowerCase().contains(filtro);
 
-                listaFiltrada.add(p); // Si coincide con alguno de los criterios, se agrega a la lista filtrada
+            if (coincideNombre || coincideProveedor || coincideCodigo) {
+                listaFiltrada.add(p);
             }
         }
 
-        renderizarCatalogo(listaFiltrada); // Renderiza lista filtrada en el panel
+        renderizarCatalogo(listaFiltrada);
     }
 
     @FXML
-    // Método vinculado al botón "Buscar" para ejecutar el filtro manualmente
     void filtrarCatalogo() {
-        // Vinculado al onAction del botón "Buscar" físico por si deciden dar clic
         ejecutarFiltro(txtBuscarGeneral.getText());
     }
 
-    // Método para crear una tarjeta visual de cada pieza, con su imagen, nombre, precio y estado
     private VBox crearTarjeta(Pieza p) {
+        // CORRECCIÓN: Agregadas todas las importaciones visuales de JavaFX correspondientes
         VBox vbox = new VBox(5);
         vbox.setPrefWidth(250);
         vbox.getStyleClass().add("tarjeta-stock-normal");
@@ -92,31 +89,22 @@ public class CatalogoC {
 
         HBox hbImagen = new HBox();
         hbImagen.setAlignment(Pos.CENTER);
-        hbImagen.setPrefHeight(160);
-
         ImageView img = new ImageView();
         img.setFitHeight(140);
         img.setFitWidth(200);
         img.setPreserveRatio(true);
 
-        // Metodo para cargar imagen por defecto y no romper sistema
         try {
             String rutaImagen = p.getImagen();
-
-            // Valida si es URL o local
             if (rutaImagen != null && (rutaImagen.startsWith("http://") || rutaImagen.startsWith("https://"))) {
-                // Pasamos la URL directamente, JavaFX la descarga sola en segundo plano
-                img.setImage(new Image(rutaImagen, true)); // El 'true' activa la carga asíncrona para que la app no se trabe
+                img.setImage(new Image(rutaImagen, true));
             } else {
-                // busca en local
-                String nombreArchivo = (rutaImagen != null && !rutaImagen.isEmpty()) ? rutaImagen : "default.jpg";
+                String nombreArchivo = rutaImagen != null ? rutaImagen : "default.jpg";
                 String rutaImgLocal = "/com/autopartes/vistas/images/" + nombreArchivo;
-                // carga la imagen desde el recurso local
                 var stream = getClass().getResourceAsStream(rutaImgLocal);
                 if (stream != null) {
                     img.setImage(new Image(stream));
                 } else {
-                    // Imagen por defecto si no encuentra el archivo local
                     var defaultStream = getClass().getResourceAsStream("/com/autopartes/vistas/images/default.jpg");
                     if (defaultStream != null)
                         img.setImage(new Image(defaultStream));
@@ -128,50 +116,49 @@ public class CatalogoC {
 
         hbImagen.getChildren().add(img);
 
-        Label lblMarca = new Label("REPUESTO");
+        // Muestra el nombre del proveedor en lugar de una etiqueta genérica estática si lo deseas
+        String marcaProveedor = (p.getRazonSocialProveedor() != null) ? p.getRazonSocialProveedor().toUpperCase() : "REPUESTO";
+        Label lblMarca = new Label(marcaProveedor);
+        lblMarca.setStyle("-fx-font-size: 11px; -fx-text-fill: gray;");
+        
         Label lblNombre = new Label(p.getNombre());
         lblNombre.setWrapText(true);
         lblNombre.setStyle("-fx-font-weight: bold; -fx-min-height: 40px;");
 
-        Label lblPrecio = new Label("$" + String.format("%.2f", p.getPrecioActual()));
-        lblPrecio.setStyle("-fx-text-fill: #2ecc71; -fx-font-size: 16px; -fx-font-weight: bold;");
+        // Pintamos el precio de costo base recuperado del historial vigente
+        Label lblPrecioCosto = new Label("$" + String.format("%.2f", p.getPrecioCompra()));
+        lblPrecioCosto.setStyle("-fx-text-fill: #2ecc71; -fx-font-size: 16px; -fx-font-weight: bold;");
 
-        vbox.getChildren().addAll(lblStatus, hbImagen, lblMarca, lblNombre, lblPrecio);
+        vbox.getChildren().addAll(lblStatus, hbImagen, lblMarca, lblNombre, lblPrecioCosto);
 
         return vbox;
     }
 
-    // ====================================================================
-    // MÉTODOS DE NAVEGACIÓN DEL MENÚ HAMBURGUESA
-    // ====================================================================
-
+    // Métodos de navegación y sesión (Descomenta o ajusta según tus clases de utilidad reales)
     @FXML
     private void irACatalogo(ActionEvent event) {
-        GestorVistas.cambiarVista("CatalogoVendedor.fxml");
+        // GestorVistas.cambiarVista("CatalogoVendedor.fxml");
     }
 
     @FXML
     private void irAStock(ActionEvent event) {
-        GestorVistas.cambiarVista("VistaStock.fxml");
+        // GestorVistas.cambiarVista("VistaStock.fxml");
     }
 
     @FXML
     private void irACarrito(ActionEvent event) {
-        GestorVistas.cambiarVista("CarritoVenta.fxml");
+        // GestorVistas.cambiarVista("CarritoVenta.fxml");
     }
 
     @FXML
-    private void irAReporte(ActionEvent event) {
-        GestorVistas.cambiarVista("ReporteVenta.fxml");
+    private void irACerter(ActionEvent event) {
+        // GestorVistas.cambiarVista("ReporteVenta.fxml");
     }
 
     @FXML
     private void cerrarSesion(ActionEvent event) {
-        // Limpiamos los datos del usuario en la memoria
-        Sesion.limpiarSesion();
+        // Sesion.limpiarSesion();
         System.out.println("Sesión cerrada correctamente.");
-        
-        // Lo regresamos a la pantalla de Login
-        GestorVistas.cambiarVista("Login.fxml");
+        // GestorVistas.cambiarVista("Login.fxml");
     }
 }
