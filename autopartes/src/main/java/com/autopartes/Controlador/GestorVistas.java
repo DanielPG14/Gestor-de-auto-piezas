@@ -99,4 +99,44 @@ public class GestorVistas {
             e.printStackTrace();
         }
     }
+
+    /**
+     * Cambia de vista y permite pasar un controlador para inicialización personalizada.
+     * Útil para transferir datos entre controladores (ej: Carrito → Checkout).
+     */
+    public static <T> T cambiarVistaConControlador(String nombreFxml) {
+        if (!tienePermiso(nombreFxml)) {
+            String nombreRol = (Sesion.getUsuario() != null) ? Sesion.getUsuario().getRol() : "Desconocido";
+            
+            Alert alerta = new Alert(Alert.AlertType.WARNING);
+            alerta.setTitle("Acceso Denegado");
+            alerta.setHeaderText("Restricción de Seguridad");
+            alerta.setContentText("Tu perfil de " + nombreRol + " no tiene autorización para esta vista.");
+            alerta.showAndWait();
+            return null;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(GestorVistas.class.getResource("/com/autopartes/" + nombreFxml));
+            Parent root = loader.load();
+            
+            Scene nuevaEscena = new Scene(root);
+            ventanaPrincipal.setScene(nuevaEscena);
+            
+            if (Sesion.getUsuario() != null) {
+                ventanaPrincipal.setTitle("Gestor de Auto-Piezas | " + Sesion.getUsuario().getRol());
+            } else {
+                ventanaPrincipal.setTitle("Gestor de Auto-Piezas | Acceso");
+            }
+            
+            ventanaPrincipal.show();
+            
+            return loader.getController();
+            
+        } catch (IOException e) {
+            System.err.println("Error crítico: No se pudo cargar el archivo " + nombreFxml);
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
