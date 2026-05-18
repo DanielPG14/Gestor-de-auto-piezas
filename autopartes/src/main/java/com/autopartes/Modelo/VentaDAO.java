@@ -56,20 +56,26 @@ public class VentaDAO {
             
             LOGGER.log(Level.INFO, "Transacción iniciada. Auto-commit desactivado.");
 
-            // ========================================================================
-            // PASO 1: Insertar cabecera (TICKET)
-            // ========================================================================
-            int IDticketGenerado = insertarTicket(conexion, ticket, montoTotal);
-            if (IDticketGenerado <= 0) {
-                throw new SQLException("No se pudo generar el ID del ticket.");
+            // Validar stock antes de iniciar cualquier inserción
+            for (ItemCarrito item : items) {
+                validarStockSuficiente(conexion, item);
             }
-            LOGGER.log(Level.INFO, "Ticket insertado con ID: " + IDticketGenerado);
+            LOGGER.log(Level.INFO, "Validación de stock completada para " + items.size() + " productos.");
 
             // ========================================================================
-            // PASO 2: Iterar e insertar detalles (LISTA_TICKET)
+            // PASO 1: Insertar cabecera de venta
+            // ========================================================================
+            int IDventaGenerado = insertarTicket(conexion, ticket, montoTotal);
+            if (IDventaGenerado <= 0) {
+                throw new SQLException("No se pudo generar el ID de la venta.");
+            }
+            LOGGER.log(Level.INFO, "Venta insertada con ID: " + IDventaGenerado);
+
+            // ========================================================================
+            // PASO 2: Iterar e insertar detalles de venta
             // ========================================================================
             for (ItemCarrito item : items) {
-                insertarDetalleTicket(conexion, IDticketGenerado, item);
+                insertarDetalleTicket(conexion, IDventaGenerado, item);
             }
             LOGGER.log(Level.INFO, "Detalles insertados: " + items.size() + " líneas.");
 
@@ -77,20 +83,12 @@ public class VentaDAO {
             // PASO 3: Actualizar inventario (PIEZAS)
             // ========================================================================
             for (ItemCarrito item : items) {
-                actualizarInventario(conexion, item.getIDpieza(), item.getCantidad());
+                actualizarInventario(conexion, item.getPieza().getIdPieza(), item.getCantidad());
             }
             LOGGER.log(Level.INFO, "Inventario actualizado para " + items.size() + " productos.");
 
             // ========================================================================
-            // PASO 4: Registrar flujo de caja (CAJA) si el estado es 'Pagado'
-            // ========================================================================
-            if ("Pagado".equalsIgnoreCase(ticket.getEstado())) {
-                insertarMovimientoCaja(conexion, IDticketGenerado, montoTotal, turno, IDusuarioOperador);
-                LOGGER.log(Level.INFO, "Movimiento de caja registrado.");
-            }
-
-            // ========================================================================
-            // PASO 5: COMMIT
+            // PASO 4: COMMIT
             // ========================================================================
             conexion.commit();
             LOGGER.log(Level.INFO, "Transacción confirmada (COMMIT).");
@@ -124,31 +122,30 @@ public class VentaDAO {
     }
 
     /**
-     * Inserta la cabecera del ticket y retorna el ID auto-generado.
-     * TABLA: ticket (IDticket, Fecha, montoTotal, metodoPago, estado)
+     * Inserta la cabecera de venta y retorna el ID auto-generado.
+     * TABLA: ventas (id_venta, id_cliente, fecha, total)
      *
      * @param conexion Conexión activa de BD
      * @param ticket   Objeto Ticket con datos
      * @param montoTotal Monto total de la venta
-     * @return ID del ticket insertado, o -1 si hay error
+     * @return ID de la venta insertada, o -1 si hay error
      */
     private static int insertarTicket(Connection conexion, Ticket ticket, double montoTotal) 
             throws SQLException {
         
-        String sql = "INSERT INTO ticket (Fecha, montoTotal, metodoPago, estado) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO ventas (id_cliente, fecha, total) VALUES (?, ?, ?)";
         
         try (PreparedStatement pst = conexion.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pst.setTimestamp(1, Timestamp.valueOf(ticket.getFecha()));
-            pst.setDouble(2, montoTotal);
-            pst.setString(3, ticket.getMetodoPago());
-            pst.setString(4, ticket.getEstado());
+            int idCliente = 1;
+            pst.setInt(1, idCliente);
+            pst.setTimestamp(2, Timestamp.valueOf(ticket.getFecha()));
+            pst.setDouble(3, montoTotal);
             
             int rowsAffected = pst.executeUpdate();
             if (rowsAffected == 0) {
-                throw new SQLException("No se insertó el ticket.");
+                throw new SQLException("No se insertó la venta.");
             }
             
-            // Recuperar el ID auto-generado
             try (ResultSet generatedKeys = pst.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     return generatedKeys.getInt(1);
@@ -159,40 +156,38 @@ public class VentaDAO {
     }
 
     /**
-     * Inserta una línea de detalle en lista_ticket.
-     * TABLA: lista_ticket (IDlista, IDpieza, id_prod_prov, IDticket, cantidad, subtotal, ...)
+     * Inserta una línea de detalle en detalle_venta.
+     * TABLA: detalle_venta (id_detalle, id_venta, id_producto, precio_compra_historico, utilidad_pct, iva_pct, precio_venta_calculado, iva_calculado, total_linea)
      *
      * @param conexion Conexión activa de BD
-     * @param IDticket ID del ticket cabecera
+     * @param IDventa ID de la venta cabecera
      * @param item     ItemCarrito con datos del producto
      */
-    private static void insertarDetalleTicket(Connection conexion, int IDticket, ItemCarrito item) 
+    private static void insertarDetalleTicket(Connection conexion, int IDventa, ItemCarrito item) 
             throws SQLException {
         
-        double subtotal = item.calcularSubtotal();
+        double subtotal = item.getSubtotal();
         double ivaCalculado = item.calcularIva();
-        double totalLinea = item.calcularTotalLinea();
+        double precioVentaCalculado = item.getPrecioUnitario() * (1 + item.getUtilidadPct() / 100.0);
+        double totalLinea = item.getTotalLinea();
         
-        String sql = "INSERT INTO lista_ticket " +
-                     "(IDpieza, id_prod_prov, IDticket, cantidad, subtotal, precio_compra, " +
-                     "utilidad_pct, iva_pct, precio_venta, total_linea) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO detalle_venta " +
+                     "(id_venta, id_producto, precio_compra_historico, utilidad_pct, iva_pct, precio_venta_calculado, iva_calculado, total_linea) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         
         try (PreparedStatement pst = conexion.prepareStatement(sql)) {
-            pst.setInt(1, item.getIDpieza());
-            pst.setInt(2, item.getId_prod_prov());
-            pst.setInt(3, IDticket);
-            pst.setInt(4, item.getCantidad());
-            pst.setDouble(5, subtotal);
-            pst.setDouble(6, item.getPrecio_compra());
-            pst.setDouble(7, item.getUtilidad_pct());
-            pst.setDouble(8, item.getIva_pct());
-            pst.setDouble(9, item.getPrecio_venta());
-            pst.setDouble(10, totalLinea);
+            pst.setInt(1, IDventa);
+            pst.setInt(2, item.getPieza().getIdPieza());
+            pst.setDouble(3, item.getPrecioUnitario());
+            pst.setInt(4, (int) item.getUtilidadPct());
+            pst.setDouble(5, item.getIvaPct());
+            pst.setDouble(6, precioVentaCalculado);
+            pst.setDouble(7, ivaCalculado);
+            pst.setDouble(8, totalLinea);
             
             int rowsAffected = pst.executeUpdate();
             if (rowsAffected == 0) {
-                throw new SQLException("No se insertó el detalle del ticket para IDpieza: " + item.getIDpieza());
+                throw new SQLException("No se insertó el detalle de la venta para IDproducto: " + item.getPieza().getIdPieza());
             }
         }
     }
@@ -206,6 +201,22 @@ public class VentaDAO {
      * @param IDpieza  ID de la pieza
      * @param cantidad Cantidad a restar
      */
+    private static void validarStockSuficiente(Connection conexion, ItemCarrito item) throws SQLException {
+        String sql = "SELECT stock FROM piezas WHERE IDpieza = ?";
+        try (PreparedStatement pst = conexion.prepareStatement(sql)) {
+            pst.setInt(1, item.getPieza().getIdPieza());
+            try (ResultSet rs = pst.executeQuery()) {
+                if (!rs.next()) {
+                    throw new SQLException("La pieza con ID " + item.getPieza().getIdPieza() + " no existe en el inventario.");
+                }
+                int stockActual = rs.getInt("stock");
+                if (stockActual < item.getCantidad()) {
+                    throw new SQLException("Stock insuficiente para la pieza '" + item.getPieza().getNombre() + "'. Disponible: " + stockActual + ", requerido: " + item.getCantidad());
+                }
+            }
+        }
+    }
+
     private static void actualizarInventario(Connection conexion, int IDpieza, int cantidad) 
             throws SQLException {
         

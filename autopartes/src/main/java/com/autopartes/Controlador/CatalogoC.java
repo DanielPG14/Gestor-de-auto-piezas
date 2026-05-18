@@ -1,164 +1,175 @@
 package com.autopartes.Controlador;
 
+import com.autopartes.Modelo.CarritoSingleton;
+import com.autopartes.Modelo.ItemCarrito;
 import com.autopartes.Modelo.Pieza;
 import com.autopartes.Modelo.PiezaDAO;
+import com.autopartes.Modelo.Sesion;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.Label;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import java.util.ArrayList;
-import java.util.List;
+import javafx.scene.control.cell.PropertyValueFactory;
 
-// Importaciones de soporte asumidas del proyecto (Ajusta los paquetes si cambian)
-// import com.autopartes.Utilidades.GestorVistas;
-// import com.autopartes.Utilidades.Sesion;
+import java.util.List;
 
 public class CatalogoC {
 
-    @FXML
-    private FlowPane panelProductos;
-    @FXML
-    private TextField txtBuscarGeneral;
+    // Componentes FXML vinculados a CatalogoVendedor.fxml
+    @FXML private TextField txtBuscarGeneral;
+    @FXML private TableView<Pieza> tablaPiezas;
+    @FXML private TableColumn<Pieza, Integer> colIdPieza;
+    @FXML private TableColumn<Pieza, String> colNombre;
+    @FXML private TableColumn<Pieza, String> colProveedor;
+    @FXML private TableColumn<Pieza, String> colCodigoProveedor;
+    @FXML private TableColumn<Pieza, Double> colPrecioCompra;
+    @FXML private TableColumn<Pieza, Integer> colStock;
 
-    private PiezaDAO piezaDAO = new PiezaDAO();
-    private List<Pieza> listaMaestra = new ArrayList<>();
+    @FXML private Button btnAgregarCarrito;
+    @FXML private Button btnReporte;
+    @FXML private MenuItem menuReporte;
+
+    // Capa de persistencia y listas de datos
+    private final PiezaDAO piezaDAO = new PiezaDAO();
+    private final ObservableList<Pieza> listaMaestraPiezas = FXCollections.observableArrayList();
+    private FilteredList<Pieza> listaFiltradaPiezas;
 
     @FXML
     public void initialize() {
-        // Carga los datos mapeados desde la consulta con INNER JOIN
-        listaMaestra = piezaDAO.obtenerTodas();
-        renderizarCatalogo(listaMaestra);
-        
-        // Listener en tiempo real para el buscador
+        configurarColumnasTabla();
+        cargarDatosDesdeBD();
+        configurarFiltroBusqueda();
+    }
+
+    /**
+     * Vincula las columnas de la TableView con los atributos del modelo Pieza
+     */
+    private void configurarColumnasTabla() {
+        colIdPieza.setCellValueFactory(new PropertyValueFactory<>("idPieza"));
+        colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
+        colProveedor.setCellValueFactory(new PropertyValueFactory<>("razonSocialProveedor"));
+        colCodigoProveedor.setCellValueFactory(new PropertyValueFactory<>("codigoProveedor"));
+        colPrecioCompra.setCellValueFactory(new PropertyValueFactory<>("precioCompra"));
+        colStock.setCellValueFactory(new PropertyValueFactory<>("stock"));
+    }
+
+    /**
+     * Recupera las refacciones desde el DAO y las monta en la lista observable
+     */
+    private void cargarDatosDesdeBD() {
+        try {
+            List<Pieza> piezasBD = piezaDAO.obtenerTodas();
+            listaMaestraPiezas.setAll(piezasBD);
+            
+            // Inicializamos la lista filtrada apuntando a nuestra lista maestra
+            listaFiltradaPiezas = new FilteredList<>(listaMaestraPiezas, p -> true);
+            tablaPiezas.setItems(listaFiltradaPiezas);
+            
+            System.out.println("✓ Catálogo cargado con éxito. Total registros: " + piezasBD.size());
+        } catch (Exception e) {
+            System.err.println("❌ Error al cargar piezas desde el DAO: " + e.getMessage());
+            e.printStackTrace();
+            mostrarAlerta("Error de base de datos", "No se pudieron recuperar las autopartes.", Alert.AlertType.ERROR);
+        }
+    }
+
+    /**
+     * Configura un listener para que la lista se filtre automáticamente 
+     * mientras el usuario escribe en el TextField de búsqueda.
+     */
+    private void configurarFiltroBusqueda() {
         txtBuscarGeneral.textProperty().addListener((observable, oldValue, newValue) -> {
-            ejecutarFiltro(newValue);
+            listaFiltradaPiezas.setPredicate(pieza -> {
+                // Si el buscador está vacío, mostramos todos los registros
+                if (newValue == null || newValue.trim().isEmpty()) {
+                    return true;
+                }
+
+                String criterio = newValue.toLowerCase().trim();
+
+                // Evalúa coincidencias por Nombre, Proveedor o Código de barra/proveedor
+                boolean coincideNombre = pieza.getNombre() != null && pieza.getNombre().toLowerCase().contains(criterio);
+                boolean coincideProveedor = pieza.getRazonSocialProveedor() != null && pieza.getRazonSocialProveedor().toLowerCase().contains(criterio);
+                boolean coincideCodigo = pieza.getCodigoProveedor() != null && pieza.getCodigoProveedor().toLowerCase().contains(criterio);
+
+                return coincideNombre || coincideProveedor || coincideCodigo;
+            });
         });
     }
 
-    private void renderizarCatalogo(List<Pieza> listaAProcesar) {
-        panelProductos.getChildren().clear();
-        for (Pieza p : listaAProcesar) {
-            VBox tarjeta = crearTarjeta(p);
-            panelProductos.getChildren().add(tarjeta);
-        }
+    /**
+     * Acción manual del botón "Buscar" (por si el usuario prefiere dar clic o presionar Enter)
+     */
+    @FXML
+    private void filtrarCatalogo(ActionEvent event) {
+        // El listener en textProperty() ya hace el trabajo en tiempo real, 
+        // pero dejamos el método asignado para evitar excepciones del FXML.
+        System.out.println("Búsqueda ejecutada: " + txtBuscarGeneral.getText());
     }
 
-    private void ejecutarFiltro(String textoBusqueda) {
-        if (textoBusqueda == null || textoBusqueda.isEmpty()) {
-            renderizarCatalogo(listaMaestra);
+    /**
+     * 🛒 ACCIÓN PRINCIPAL: Agrega el elemento seleccionado a la instancia del Carrito
+     */
+    @FXML
+    private void agregarAlCarrito(ActionEvent event) {
+        Pieza piezaSeleccionada = tablaPiezas.getSelectionModel().getSelectedItem();
+
+        if (piezaSeleccionada == null) {
+            mostrarAlerta("Selección requerida", "Por favor, seleccione una autoparte de la tabla para agregarla al carrito.", Alert.AlertType.WARNING);
             return;
         }
 
-        String filtro = textoBusqueda.toLowerCase().trim();
-        List<Pieza> listaFiltrada = new ArrayList<>();
-        
-        for (Pieza p : listaMaestra) {
-            // CORRECCIÓN: Validaciones defensivas contra valores nulos en BD
-            boolean coincideNombre = p.getNombre() != null && p.getNombre().toLowerCase().contains(filtro);
-            boolean coincideProveedor = p.getRazonSocialProveedor() != null && p.getRazonSocialProveedor().toLowerCase().contains(filtro);
-            boolean coincideCodigo = p.getCodigoProveedor() != null && p.getCodigoProveedor().toLowerCase().contains(filtro);
-
-            if (coincideNombre || coincideProveedor || coincideCodigo) {
-                listaFiltrada.add(p);
-            }
+        // Validación defensiva de stock físico en tienda antes de procesar
+        if (piezaSeleccionada.getStock() <= 0) {
+            mostrarAlerta("Sin existencias", "La pieza '" + piezaSeleccionada.getNombre() + "' no cuenta con inventario disponible en almacén.", Alert.AlertType.ERROR);
+            return;
         }
 
-        renderizarCatalogo(listaFiltrada);
+        ItemCarrito item = new ItemCarrito(piezaSeleccionada, 1);
+        CarritoSingleton.getInstancia().agregarItem(item);
+
+        mostrarAlerta("Pieza añadida", "La pieza se agregó al carrito correctamente.", Alert.AlertType.INFORMATION);
     }
 
-    @FXML
-    void filtrarCatalogo() {
-        ejecutarFiltro(txtBuscarGeneral.getText());
-    }
-
-    private VBox crearTarjeta(Pieza p) {
-        // CORRECCIÓN: Agregadas todas las importaciones visuales de JavaFX correspondientes
-        VBox vbox = new VBox(5);
-        vbox.setPrefWidth(250);
-        vbox.getStyleClass().add("tarjeta-stock-normal");
-        vbox.setPadding(new Insets(20));
-
-        Label lblStatus = new Label("DISPONIBLE");
-
-        HBox hbImagen = new HBox();
-        hbImagen.setAlignment(Pos.CENTER);
-        ImageView img = new ImageView();
-        img.setFitHeight(140);
-        img.setFitWidth(200);
-        img.setPreserveRatio(true);
-
-        try {
-            String rutaImagen = p.getImagen();
-            if (rutaImagen != null && (rutaImagen.startsWith("http://") || rutaImagen.startsWith("https://"))) {
-                img.setImage(new Image(rutaImagen, true));
-            } else {
-                String nombreArchivo = rutaImagen != null ? rutaImagen : "default.jpg";
-                String rutaImgLocal = "/com/autopartes/vistas/images/" + nombreArchivo;
-                var stream = getClass().getResourceAsStream(rutaImgLocal);
-                if (stream != null) {
-                    img.setImage(new Image(stream));
-                } else {
-                    var defaultStream = getClass().getResourceAsStream("/com/autopartes/vistas/images/default.jpg");
-                    if (defaultStream != null)
-                        img.setImage(new Image(defaultStream));
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Error crítico al cargar imagen: " + e.getMessage());
-        }
-
-        hbImagen.getChildren().add(img);
-
-        // Muestra el nombre del proveedor en lugar de una etiqueta genérica estática si lo deseas
-        String marcaProveedor = (p.getRazonSocialProveedor() != null) ? p.getRazonSocialProveedor().toUpperCase() : "REPUESTO";
-        Label lblMarca = new Label(marcaProveedor);
-        lblMarca.setStyle("-fx-font-size: 11px; -fx-text-fill: gray;");
-        
-        Label lblNombre = new Label(p.getNombre());
-        lblNombre.setWrapText(true);
-        lblNombre.setStyle("-fx-font-weight: bold; -fx-min-height: 40px;");
-
-        // Pintamos el precio de costo base recuperado del historial vigente
-        Label lblPrecioCosto = new Label("$" + String.format("%.2f", p.getPrecioCompra()));
-        lblPrecioCosto.setStyle("-fx-text-fill: #2ecc71; -fx-font-size: 16px; -fx-font-weight: bold;");
-
-        vbox.getChildren().addAll(lblStatus, hbImagen, lblMarca, lblNombre, lblPrecioCosto);
-
-        return vbox;
-    }
-
-    // Métodos de navegación y sesión (Descomenta o ajusta según tus clases de utilidad reales)
+    // --- Métodos del Menú de Navegación Lateral / Hamburguesa ---
     @FXML
     private void irACatalogo(ActionEvent event) {
-        // GestorVistas.cambiarVista("CatalogoVendedor.fxml");
+        GestorVistas.cambiarVista("CatalogoVendedor.fxml");
     }
 
     @FXML
-    private void irAStock(ActionEvent event) {
-        // GestorVistas.cambiarVista("VistaStock.fxml");
+    private void irAMapaAlmacen(ActionEvent event) {
+        GestorVistas.cambiarVista("VistaStock.fxml");
     }
 
     @FXML
     private void irACarrito(ActionEvent event) {
-        // GestorVistas.cambiarVista("CarritoVenta.fxml");
+        GestorVistas.cambiarVista("CarritoVenta.fxml");
     }
 
     @FXML
-    private void irACerter(ActionEvent event) {
-        // GestorVistas.cambiarVista("ReporteVenta.fxml");
+    private void irAReporte(ActionEvent event) {
+        GestorVistas.cambiarVista("ReporteVenta.fxml");
     }
 
     @FXML
     private void cerrarSesion(ActionEvent event) {
-        // Sesion.limpiarSesion();
-        System.out.println("Sesión cerrada correctamente.");
-        // GestorVistas.cambiarVista("Login.fxml");
+        Sesion.limpiarSesion();
+        GestorVistas.cambiarVista("Login.fxml");
+    }
+
+    private void mostrarAlerta(String titulo, String mensaje, Alert.AlertType tipo) {
+        Alert alerta = new Alert(tipo);
+        alerta.setTitle(titulo);
+        alerta.setHeaderText(null);
+        alerta.setContentText(mensaje);
+        alerta.showAndWait();
     }
 }

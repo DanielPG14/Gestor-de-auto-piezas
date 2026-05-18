@@ -13,130 +13,120 @@ public class GestorVistas {
 
     private static Stage ventanaPrincipal;
 
-    // Se llama desde App.java al iniciar el programa
     public static void setVentanaPrincipal(Stage stage) {
         ventanaPrincipal = stage;
     }
 
-    /**
-     * Valida si el usuario en sesión tiene permiso para ver el FXML solicitado.
-     */
     private static boolean tienePermiso(String nombreFxml) {
-        // El Login siempre es accesible
-        if (nombreFxml.equals("Login.fxml")) {
+        if (nombreFxml.equals("Login.fxml"))
+            return true;
+
+        Usuario usuarioActual = Sesion.getUsuario();
+        if (usuarioActual == null)
+            return false;
+
+        String rol = usuarioActual.getRol().trim().toLowerCase();
+
+        if (rol.contains("cajero") || rol.contains("vendedor")) {
+            return nombreFxml.equals("CatalogoVendedor.fxml") ||
+                    nombreFxml.equals("VistaStock.fxml") ||
+                    nombreFxml.equals("CarritoVenta.fxml") ||
+                    nombreFxml.equals("ReporteVenta.fxml");
+        }
+
+        if (rol.contains("almacenista")) {
+            return nombreFxml.equals("ControlInventario.fxml") ||
+                    nombreFxml.equals("VistaStockAlm.fxml") ||
+                    nombreFxml.equals("MapaAlmacen.fxml");
+        }
+
+        if (rol.contains("admin") || rol.contains("administrador")) {
             return true;
         }
 
-        Usuario usuarioActual = Sesion.getUsuario();
-        
-        // Si no hay sesión, bloqueamos cualquier intento de navegación
-        if (usuarioActual == null) {
-            return false;
-        }
-
-        String rol = usuarioActual.getRol().trim();
-
-        // Lógica de permisos por rol
-        switch (rol) {
-            case "Cajero":
-                return nombreFxml.equals("CatalogoVendedor.fxml") || 
-                       nombreFxml.equals("VistaStock.fxml") || 
-                       nombreFxml.equals("CarritoVenta.fxml") || 
-                       nombreFxml.equals("Checkout.fxml") || 
-                       nombreFxml.equals("ReporteVenta.fxml");
-
-            case "Almacenista":
-                return nombreFxml.equals("VistaStockAlm.fxml") ||
-                       nombreFxml.equals("VistaStock.fxml") || 
-                       //nombreFxml.equals("GenerarListaVendedor.fxml") || 
-                       nombreFxml.equals("ReporteVenta.fxml");
-
-            case "Vendedor":
-                //return nombreFxml.equals("ListaGenerada.fxml") || 
-                       //nombreFxml.equals("ListaProveedores.fxml");
-
-            default:
-                return false;
-        }
+        // ¡ESTA LÍNEA ES LA QUE TE FALTA!
+        // Si no entra en ningún if anterior, debe retornar algo.
+        return false;
     }
 
-    /**
-     * Cambia la escena actual de la ventana principal.
-     */
+    // Método estándar para cambios de vista simples
     public static void cambiarVista(String nombreFxml) {
-        // 1. Verificación de seguridad
         if (!tienePermiso(nombreFxml)) {
             String nombreRol = (Sesion.getUsuario() != null) ? Sesion.getUsuario().getRol() : "Desconocido";
-            
-            Alert alerta = new Alert(Alert.AlertType.WARNING);
-            alerta.setTitle("Acceso Denegado");
-            alerta.setHeaderText("Restricción de Seguridad");
-            alerta.setContentText("Tu perfil de " + nombreRol + " no tiene autorización para esta vista.");
-            alerta.showAndWait();
-            return; 
+            mostrarAlertaAccesoDenegado(nombreRol, nombreFxml);
+            return;
         }
 
-        // 2. Carga del archivo FXML
         try {
-            // Ajusta la ruta si tus FXML están dentro de una carpeta /vistas/
             FXMLLoader loader = new FXMLLoader(GestorVistas.class.getResource("/com/autopartes/" + nombreFxml));
             Parent root = loader.load();
-            
+
             Scene nuevaEscena = new Scene(root);
             ventanaPrincipal.setScene(nuevaEscena);
-            
-            // 3. Título dinámico según el estado de la sesión
-            if (Sesion.getUsuario() != null) {
-                ventanaPrincipal.setTitle("Gestor de Auto-Piezas | " + Sesion.getUsuario().getRol());
-            } else {
-                ventanaPrincipal.setTitle("Gestor de Auto-Piezas | Acceso");
-            }
-            
+
+            actualizarTitulo();
             ventanaPrincipal.show();
-            
+
         } catch (IOException e) {
-            System.err.println("Error crítico: No se pudo cargar el archivo " + nombreFxml);
-            e.printStackTrace();
+            mostrarAlertaErrorCarga(nombreFxml, e);
         }
     }
 
-    /**
-     * Cambia de vista y permite pasar un controlador para inicialización personalizada.
-     * Útil para transferir datos entre controladores (ej: Carrito → Checkout).
-     */
+    // CORRECCIÓN: Método recuperado para controladores que inyectan datos entre sí
+    // (como CatalogoC)
     public static <T> T cambiarVistaConControlador(String nombreFxml) {
         if (!tienePermiso(nombreFxml)) {
             String nombreRol = (Sesion.getUsuario() != null) ? Sesion.getUsuario().getRol() : "Desconocido";
-            
-            Alert alerta = new Alert(Alert.AlertType.WARNING);
-            alerta.setTitle("Acceso Denegado");
-            alerta.setHeaderText("Restricción de Seguridad");
-            alerta.setContentText("Tu perfil de " + nombreRol + " no tiene autorización para esta vista.");
-            alerta.showAndWait();
-            return null;
+            mostrarAlertaAccesoDenegado(nombreRol, nombreFxml);
+            return null; // Detiene el flujo sin romper la interfaz gráfica previa
         }
 
         try {
             FXMLLoader loader = new FXMLLoader(GestorVistas.class.getResource("/com/autopartes/" + nombreFxml));
             Parent root = loader.load();
-            
+
             Scene nuevaEscena = new Scene(root);
             ventanaPrincipal.setScene(nuevaEscena);
-            
+
+            actualizarTitulo();
+            ventanaPrincipal.show();
+
+            // Retorna el controlador de la nueva vista para edición dinámica
+            return loader.getController();
+
+        } catch (IOException e) {
+            mostrarAlertaErrorCarga(nombreFxml, e);
+            return null;
+        }
+    }
+
+    // Métodos auxiliares de soporte para evitar código repetido
+    private static void actualizarTitulo() {
+        if (ventanaPrincipal != null) {
             if (Sesion.getUsuario() != null) {
                 ventanaPrincipal.setTitle("Gestor de Auto-Piezas | " + Sesion.getUsuario().getRol());
             } else {
                 ventanaPrincipal.setTitle("Gestor de Auto-Piezas | Acceso");
             }
-            
-            ventanaPrincipal.show();
-            
-            return loader.getController();
-            
-        } catch (IOException e) {
-            System.err.println("Error crítico: No se pudo cargar el archivo " + nombreFxml);
-            e.printStackTrace();
-            return null;
         }
+    }
+
+    private static void mostrarAlertaAccesoDenegado(String nombreRol, String nombreFxml) {
+        Alert alerta = new Alert(Alert.AlertType.WARNING);
+        alerta.setTitle("Acceso Denegado");
+        alerta.setHeaderText("Restricción de Seguridad");
+        alerta.setContentText("Tu perfil de " + nombreRol + " no tiene autorización para la vista: " + nombreFxml);
+        alerta.showAndWait();
+    }
+
+    private static void mostrarAlertaErrorCarga(String nombreFxml, IOException e) {
+        System.err.println("Error crítico: No se pudo cargar el archivo " + nombreFxml);
+        e.printStackTrace();
+
+        Alert alertaError = new Alert(Alert.AlertType.ERROR);
+        alertaError.setTitle("Error de Carga");
+        alertaError.setHeaderText("No se pudo encontrar o renderizar la vista");
+        alertaError.setContentText("Archivo conflictivo: " + nombreFxml + "\nRevisa la consola para más detalles.");
+        alertaError.showAndWait();
     }
 }

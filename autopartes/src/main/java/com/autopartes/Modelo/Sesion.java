@@ -1,7 +1,7 @@
 package com.autopartes.Modelo;
 
 public class Sesion {
-    //Variable estatica para login
+    // Variable estática para login
     private static Usuario usuarioLogueado;
 
     // Se llama desde el Login al tener éxito
@@ -12,6 +12,13 @@ public class Sesion {
     // Se llama desde cualquier otra ventana para saber quién es el usuario
     public static Usuario getUsuario() {
         return usuarioLogueado;
+    }
+
+    public static String getRolActivo() {
+        if (usuarioLogueado != null && usuarioLogueado.getRol() != null) {
+            return usuarioLogueado.getRol().toLowerCase().trim();
+        }
+        return "invitado"; // Retorno seguro si no hay sesión iniciada
     }
 
     // Para cuando el usuario quiera cerrar sesión
