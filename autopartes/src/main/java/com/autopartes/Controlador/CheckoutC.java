@@ -38,7 +38,7 @@ public class CheckoutC {
     @FXML private Button btnVolverCarrito;
 
     // === PROPIEDADES INTERNAS ===
-    private ObservableList<CarritoVentaC.ItemCarrito> itemsCarrito;
+    private ObservableList<ItemCarrito> itemsCarrito;
     private double subtotalVenta = 0;
     private double ivaVenta = 0;
     private double totalVenta = 0;
@@ -49,7 +49,7 @@ public class CheckoutC {
     /**
      * Inicializa el controlador con datos del carrito.
      */
-    public void inicializarDatos(ObservableList<CarritoVentaC.ItemCarrito> items, 
+    public void inicializarDatos(ObservableList<ItemCarrito> items, 
                                  double subtotal, double iva, double total) {
         this.itemsCarrito = items;
         this.subtotalVenta = subtotal;
@@ -88,7 +88,7 @@ public class CheckoutC {
             String turno = obtenerTurnoActual();  
             int IDusuarioOperador = obtenerIDUsuarioActual();  
 
-            List<ItemCarrito> items = convertirItemsCarrito(itemsCarrito);
+            List<ItemCarrito> items = new ArrayList<>(itemsCarrito);
 
             Ticket ticket = new Ticket(
                 LocalDateTime.now(),
@@ -123,25 +123,8 @@ public class CheckoutC {
     /**
      * Convierte ObservableList a List para el DAO.
      */
-    private List<ItemCarrito> convertirItemsCarrito(ObservableList<CarritoVentaC.ItemCarrito> items) {
-        List<ItemCarrito> listaItems = new ArrayList<>();
-        
-        for (CarritoVentaC.ItemCarrito itemCarrito : items) {
-            Pieza pieza = itemCarrito.getPieza();
-            
-            ItemCarrito item = new ItemCarrito(
-                pieza.getIdPieza(),           
-                obtenerIdProdProv(pieza),     
-                1,                            
-                pieza.getPrecioCompra(),       
-                itemCarrito.getUtilidadPct(),  
-                itemCarrito.getIvaPct(),       
-                itemCarrito.getPrecioVenta()   
-            );
-            
-            listaItems.add(item);
-        }
-        return listaItems;
+    private List<ItemCarrito> convertirItemsCarrito(ObservableList<ItemCarrito> items) {
+        return new ArrayList<>(items);
     }
 
     private int obtenerIdProdProv(Pieza pieza) {
@@ -189,10 +172,10 @@ public class CheckoutC {
             "Producto", "Costo Base", "Utilidad", "IVA%", "Total"));
         ticket.append("─".repeat(80) + "\n");
 
-        for (CarritoVentaC.ItemCarrito item : itemsCarrito) {
+        for (ItemCarrito item : itemsCarrito) {
             String nombre = item.getPieza().getNombre();
             double precioBase = item.getPieza().getPrecioCompra();
-            int utilidad = item.getUtilidadPct();
+            int utilidad = (int) item.getUtilidadPct();
             double ivaPct = item.getIvaPct();
             double totalLinea = item.getTotalLinea();
 

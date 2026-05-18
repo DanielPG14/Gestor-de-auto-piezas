@@ -1,76 +1,57 @@
 package com.autopartes.Modelo;
 
 /**
- * Wrapper para pasar datos del carrito al método de venta.
- * Encapsula toda la información necesaria de cada item vendido.
+ * Representa un item dentro del carrito de ventas.
+ * Contiene la pieza seleccionada, la cantidad y el subtotal calculado.
  */
 public class ItemCarrito {
-    private int IDpieza;
-    private int id_prod_prov;
-    private int cantidad;
-    private double precio_compra;
-    private double utilidad_pct;
-    private double iva_pct;
-    private double precio_venta;
+    private final Pieza pieza;
+    private final int cantidad;
+    private final double subtotal;
 
-    public ItemCarrito(int IDpieza, int id_prod_prov, int cantidad, double precio_compra,
-                       double utilidad_pct, double iva_pct, double precio_venta) {
-        this.IDpieza = IDpieza;
-        this.id_prod_prov = id_prod_prov;
+    public ItemCarrito(Pieza pieza, int cantidad) {
+        this.pieza = pieza;
         this.cantidad = cantidad;
-        this.precio_compra = precio_compra;
-        this.utilidad_pct = utilidad_pct;
-        this.iva_pct = iva_pct;
-        this.precio_venta = precio_venta;
+        this.subtotal = pieza.getPrecioCompra() * cantidad;
     }
 
-    // Getters
-    public int getIDpieza() {
-        return IDpieza;
-    }
-
-    public int getId_prod_prov() {
-        return id_prod_prov;
+    public Pieza getPieza() {
+        return pieza;
     }
 
     public int getCantidad() {
         return cantidad;
     }
 
-    public double getPrecio_compra() {
-        return precio_compra;
+    public double getSubtotal() {
+        return subtotal;
     }
 
-    public double getUtilidad_pct() {
-        return utilidad_pct;
+    public double getPrecioUnitario() {
+        return pieza.getPrecioCompra();
     }
 
-    public double getIva_pct() {
-        return iva_pct;
+    public double getIvaPct() {
+        return 16.0;
     }
 
-    public double getPrecio_venta() {
-        return precio_venta;
+    public double getUtilidadPct() {
+        return 30.0;
     }
 
-    /**
-     * Calcula el subtotal (precio_venta * cantidad).
-     */
-    public double calcularSubtotal() {
-        return precio_venta * cantidad;
+    public double getTotalLinea() {
+        return subtotal + calcularIva();
     }
 
-    /**
-     * Calcula el IVA de la línea.
-     */
     public double calcularIva() {
-        return calcularSubtotal() * (iva_pct / 100.0);
+        return subtotal * (getIvaPct() / 100.0);
     }
 
-    /**
-     * Calcula el total de la línea (subtotal + IVA).
-     */
     public double calcularTotalLinea() {
-        return calcularSubtotal() + calcularIva();
+        return getTotalLinea();
+    }
+
+    public ItemCarrito withCantidad(int nuevaCantidad) {
+        return new ItemCarrito(pieza, nuevaCantidad);
     }
 }

@@ -10,31 +10,19 @@ public class Conexion {
     private static final String USER = "root"; 
     private static final String PASSWORD = "";
 
-    private static Connection conexion = null;
+    // Eliminamos la variable estática única para evitar bloqueos entre hilos
 
     private Conexion() {}
 
+    // Ahora este método genera una conexión nueva y fresca cada vez que se solicita
     public static Connection getInstancia() {
         try {
-            if (conexion == null || conexion.isClosed()) {
-                Class.forName("com.mysql.cj.jdbc.Driver");
-                conexion = DriverManager.getConnection(URL, USER, PASSWORD);
-                System.out.println("LOG: Conexión establecida con éxito.");
-            }
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            // Retorna una conexión directa que el try-with-resources del DAO se encargará de cerrar
+            return DriverManager.getConnection(URL, USER, PASSWORD);
         } catch (ClassNotFoundException | SQLException e) {
             System.err.println("ERROR: No se pudo conectar a la base de datos: " + e.getMessage());
-        }
-        return conexion;
-    }
-
-    public static void cerrarConexion() {
-        if (conexion != null) {
-            try {
-                conexion.close();
-                System.out.println("LOG: Conexión cerrada.");
-            } catch (SQLException e) {
-                System.err.println("ERROR: Error al cerrar: " + e.getMessage());
-            }
+            return null;
         }
     }
 }
