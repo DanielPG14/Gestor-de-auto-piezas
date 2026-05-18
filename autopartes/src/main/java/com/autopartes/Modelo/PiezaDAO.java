@@ -302,20 +302,61 @@ public class PiezaDAO {
     }
 
     public boolean actualizarPieza(Pieza p) {
-        String sql = "UPDATE piezas SET nombre = ?, stock = ?, IDestante = ?, nivelAsigned = ? WHERE IDpieza = ?";
-        try (Connection db = Conexion.getInstancia();
-                PreparedStatement ps = db.prepareStatement(sql)) {
+        String sqlPiezas = "UPDATE piezas SET nombre = ?, stock = ?, IDestante = ?, nivelAsigned = ? WHERE IDpieza = ?";
+        String sqlHistorial = "UPDATE historial_precio hp " +
+                "INNER JOIN producto_proveedor pp ON hp.id_prod_prov = pp.id_prod_prov " +
+                "SET hp.precio_compra = ? " +
+                "WHERE pp.id_pieza = ? AND hp.fecha_fin IS NULL";
 
-            ps.setString(1, p.getNombre());
-            ps.setInt(2, p.getStock());
-            ps.setInt(3, Integer.parseInt(p.getIdEstante()));
-            ps.setInt(4, p.getNivelAsigned());
-            ps.setInt(5, p.getIdPieza());
+        Connection db = null;
+        try {
+            db = Conexion.getInstancia();
+            db.setAutoCommit(false);
 
-            return ps.executeUpdate() > 0;
+            try (PreparedStatement psPiezas = db.prepareStatement(sqlPiezas);
+                 PreparedStatement psHistorial = db.prepareStatement(sqlHistorial)) {
+
+                psPiezas.setString(1, p.getNombre());
+                psPiezas.setInt(2, p.getStock());
+                psPiezas.setInt(3, Integer.parseInt(p.getIdEstante()));
+                psPiezas.setInt(4, p.getNivelAsigned());
+                psPiezas.setInt(5, p.getIdPieza());
+
+                psHistorial.setDouble(1, p.getPrecioCompra());
+                psHistorial.setInt(2, p.getIdPieza());
+
+                int affectedPiezas = psPiezas.executeUpdate();
+                int affectedHistorial = psHistorial.executeUpdate();
+
+                if (affectedPiezas > 0 && affectedHistorial > 0) {
+                    db.commit();
+                    System.out.println("PiezaDAO.actualizarPieza -> commit exitoso. filasPiezas=" + affectedPiezas + ", filasHistorial=" + affectedHistorial);
+                    return true;
+                }
+
+                db.rollback();
+                System.err.println("PiezaDAO.actualizarPieza -> rollback porque al menos una actualización no afectó filas. filasPiezas=" + affectedPiezas + ", filasHistorial=" + affectedHistorial);
+                return false;
+            }
         } catch (SQLException e) {
+            if (db != null) {
+                try {
+                    db.rollback();
+                } catch (SQLException rollbackEx) {
+                    System.err.println("PiezaDAO.actualizarPieza -> error en rollback: " + rollbackEx.getMessage());
+                }
+            }
             System.err.println("Error en actualizarPieza: " + e.getMessage());
             return false;
+        } finally {
+            if (db != null) {
+                try {
+                    db.setAutoCommit(true);
+                    db.close();
+                } catch (SQLException e) {
+                    System.err.println("Error cerrando conexión en actualizarPieza: " + e.getMessage());
+                }
+            }
         }
     }
 }

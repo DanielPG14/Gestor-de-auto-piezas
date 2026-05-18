@@ -42,17 +42,24 @@ public class StockAlmC extends StockC {
     }
 
     private void cargarProveedores() {
-        // Asumiendo que tienes un método en tu DAO para obtener nombres o IDs
-        cmbProveedores.getItems().addAll("Proveedor A", "Proveedor B", "Proveedor C");
+        cmbProveedores.getItems().clear();
+        cmbProveedores.getItems().addAll(piezaDAO.obtenerRazonSocialProveedores());
+        if (!cmbProveedores.getItems().isEmpty()) {
+            cmbProveedores.getSelectionModel().selectFirst();
+        }
     }
 
     private void cargarDetallesEnFormulario(Pieza p) {
         txtNombre.setText(p.getNombre());
-        txtEstante.setText(String.valueOf(p.getIdEstante()));
+        txtEstante.setText(p.getIdEstante());
         txtNivel.setText(String.valueOf(p.getNivelAsigned()));
         txtStock.setText(String.valueOf(p.getStock()));
         txtCapMax.setText(String.valueOf(p.getCapMax()));
-        // txtPrecio y otros campos según tu modelo
+        txtPrecio.setText(String.valueOf(p.getPrecioCompra()));
+        txtCodigoProv.setText(p.getCodigoProveedor());
+        if (p.getRazonSocialProveedor() != null) {
+            cmbProveedores.getSelectionModel().select(p.getRazonSocialProveedor());
+        }
     }
 
     @FXML
@@ -66,8 +73,14 @@ public class StockAlmC extends StockC {
                     Integer.parseInt(txtStock.getText()),
                     Integer.parseInt(txtCapMax.getText()));
 
+            String proveedorSeleccionado = cmbProveedores.getSelectionModel().getSelectedItem();
+            if (proveedorSeleccionado == null || proveedorSeleccionado.isBlank()) {
+                mostrarAlerta("Error", "Selecciona un proveedor válido de la lista.");
+                return;
+            }
+
             // Seteamos los valores extra que el DAO necesita para las tablas intermedias
-            nueva.setRazonSocialProveedor(cmbProveedores.getValue());
+            nueva.setRazonSocialProveedor(proveedorSeleccionado);
             nueva.setCodigoProveedor(txtCodigoProv.getText());
             nueva.setPrecioCompra(Double.parseDouble(txtPrecio.getText()));
 
@@ -89,13 +102,25 @@ public class StockAlmC extends StockC {
             return;
         }
 
-        seleccionada.setNombre(txtNombre.getText());
-        seleccionada.setStock(Integer.parseInt(txtStock.getText()));
-        // ... setear el resto de campos
+        try {
+            seleccionada.setNombre(txtNombre.getText());
+            seleccionada.setIdEstante(txtEstante.getText());
+            seleccionada.setNivelAsigned(Integer.parseInt(txtNivel.getText()));
+            seleccionada.setStock(Integer.parseInt(txtStock.getText()));
+            seleccionada.setCapMax(Integer.parseInt(txtCapMax.getText()));
+            seleccionada.setPrecioCompra(Double.parseDouble(txtPrecio.getText()));
+            seleccionada.setCodigoProveedor(txtCodigoProv.getText());
+            seleccionada.setRazonSocialProveedor(cmbProveedores.getValue());
 
-        if (piezaDAO.actualizarPieza(seleccionada)) {
-            mostrarAlerta("Éxito", "Stock actualizado.");
-            actualizarTablaYComponentes();
+            if (piezaDAO.actualizarPieza(seleccionada)) {
+                mostrarAlerta("Éxito", "Pieza actualizada correctamente.");
+                actualizarTablaYComponentes();
+                tablaStock.refresh();
+            } else {
+                mostrarAlerta("Error", "No se pudo actualizar la pieza en la base de datos.");
+            }
+        } catch (NumberFormatException e) {
+            mostrarAlerta("Error", "Revisa los valores numéricos: " + e.getMessage());
         }
     }
 
