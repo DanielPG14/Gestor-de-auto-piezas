@@ -3,21 +3,10 @@ package com.autopartes.Controlador;
 import com.autopartes.Modelo.*;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Controlador de CHECKOUT - Ejemplo de uso del método procesarVenta.
- * 
- * RESPONSABILIDAD:
- * - Capturar datos del cliente
- * - Capturar método de pago y turno
- * - Validar antes de procesar
- * - Invocar VentaDAO.procesarVenta() con transacción ACID
- * - Manejar éxito/error y dar feedback al usuario
- */
 public class CheckoutController {
 
     @FXML private TextField txtMetodoPago;
@@ -26,76 +15,55 @@ public class CheckoutController {
     @FXML private Button btnConfirmarVenta;
     @FXML private Label lblEstadoTransaccion;
 
-    /**
-     * Ejemplo de cómo usar el método procesarVenta.
-     * En un caso real, estos parámetros vendrían de:
-     * - El carrito (items)
-     * - Los campos del formulario (metodoPago, turno, IDusuario)
-     * - La sesión del usuario (IDusuarioOperador)
-     */
     @FXML
     private void confirmarVenta() {
-        // 1. Validar campos
-        if (txtMetodoPago.getText().isEmpty() || txtTurno.getText().isEmpty()) {
+        if (txtMetodoPago.getText().isEmpty() || txtTurno.getText().isEmpty() || txtUsuarioID.getText().isEmpty()) {
             mostrarError("Debe completar todos los campos");
             return;
         }
 
-        // 2. Obtener datos del formulario
-        String metodoPago = txtMetodoPago.getText();  // Efectivo, Tarjeta, Transferencia
-        String turno = txtTurno.getText();             // Matutino, Vespertino
-        int IDusuarioOperador = Integer.parseInt(txtUsuarioID.getText());
+        try {
+            String metodoPago = txtMetodoPago.getText();
+            String turno = txtTurno.getText();
+            int IDusuarioOperador = Integer.parseInt(txtUsuarioID.getText());
 
-        // 3. Crear objeto Ticket
-        Ticket ticket = new Ticket(
-            LocalDateTime.now(),
-            0.0,  // Se calculará después
-            metodoPago,
-            "Pagado"  // Estado: Pendiente, Pagado, Cancelado
-        );
+            Ticket ticket = new Ticket(
+                LocalDateTime.now(),
+                0.0,
+                metodoPago,
+                "Pagado"
+            );
 
-        // 4. Construir lista de items del carrito
-        // EN PRODUCCIÓN: Estos vendrían del carrito real del usuario
-        List<ItemCarrito> items = construirItemsDelCarrito();
+            // Obtenemos los items REALES del Singleton
+            List<ItemCarrito> items = construirItemsDelCarrito();
 
-        // 5. Calcular monto total
-        double montoTotal = items.stream()
-                .mapToDouble(ItemCarrito::calcularTotalLinea)
-                .sum();
-        ticket.setMontoTotal(montoTotal);
+            if (items.isEmpty()) {
+                mostrarError("El carrito está vacío, no se puede procesar la venta.");
+                return;
+            }
 
-        // 6. LLAMAR AL MÉTODO MAESTRO TRANSACCIONAL
-        boolean exito = VentaDAO.procesarVenta(ticket, items, montoTotal, turno, IDusuarioOperador);
+            double montoTotal = items.stream().mapToDouble(ItemCarrito::getTotalLinea).sum();
+            ticket.setMontoTotal(montoTotal);
 
-        // 7. Manejar resultado
-        if (exito) {
-            mostrarExito("¡Venta procesada exitosamente! Total: $" + String.format("%.2f", montoTotal));
-            limpiarFormulario();
-        } else {
-            mostrarError("Error al procesar la venta. La transacción fue revertida.");
+            boolean exito = VentaDAO.procesarVenta(ticket, items, montoTotal, turno, IDusuarioOperador);
+
+            if (exito) {
+                mostrarExito("¡Venta procesada exitosamente! Total: $" + String.format("%.2f", montoTotal));
+                limpiarFormulario();
+                // Si la venta se guardó, vaciamos el carrito del sistema
+                CarritoSingleton.getInstancia().vaciarCarrito();
+            } else {
+                mostrarError("Error al procesar la venta. La transacción fue revertida.");
+            }
+
+        } catch (NumberFormatException e) {
+            mostrarError("El ID de Usuario debe ser un número válido.");
         }
     }
 
-    /**
-     * Construye la lista de ItemCarrito desde el carrito real.
-     * EN PRODUCCIÓN: Esta información vendría del modelo de carrito compartido.
-     */
     private List<ItemCarrito> construirItemsDelCarrito() {
-        List<ItemCarrito> items = new ArrayList<>();
-
-        // Ejemplo: Agregar items al carrito
-        // ItemCarrito item1 = new ItemCarrito(
-        //     1,      // IDpieza
-        //     10,     // id_prod_prov
-        //     2,      // cantidad
-        //     100.0,  // precio_compra
-        //     20.0,   // utilidad_pct
-        //     16.0,   // iva_pct
-        //     120.0   // precio_venta (100 * (1 + 20/100))
-        // );
-        // items.add(item1);
-
-        return items;
+        // Tomamos los productos que están guardados en memoria globalmente
+        return new ArrayList<>(CarritoSingleton.getInstancia().getItems());
     }
 
     private void mostrarExito(String mensaje) {

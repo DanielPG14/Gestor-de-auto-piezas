@@ -4,33 +4,55 @@ import com.autopartes.Modelo.Pieza;
 import com.autopartes.Modelo.PiezaDAO;
 import com.autopartes.Modelo.EstanteDAO;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.util.Duration;
 import java.util.List;
 
 public class StockC {
 
     // Componentes emparejados perfectamente con los fx:id de tu FXML
-    @FXML protected TableView<Pieza> tablaStock;
-    @FXML protected TableColumn<Pieza, Integer> colID;
-    @FXML protected TableColumn<Pieza, String> colNombre;
-    @FXML protected TableColumn<Pieza, String> colEstante;
-    @FXML protected TableColumn<Pieza, Integer> colNivel;
-    @FXML protected TableColumn<Pieza, Integer> colStock;
-    @FXML protected TableColumn<Pieza, Integer> colCapMax;
+    @FXML
+    protected TableView<Pieza> tablaStock;
+    @FXML
+    protected TableColumn<Pieza, Integer> colID;
+    @FXML
+    protected TableColumn<Pieza, String> colNombre;
+    @FXML
+    protected TableColumn<Pieza, String> colEstante;
+    @FXML
+    protected TableColumn<Pieza, Integer> colNivel;
+    @FXML
+    protected TableColumn<Pieza, Integer> colStock;
+    @FXML
+    protected TableColumn<Pieza, Integer> colCapMax;
+    @FXML
+    protected TextField txtBuscarGeneral;
 
-    @FXML protected ListView<String> listaEstantes; 
-    @FXML protected Button btnAnterior;
-    @FXML protected Button btnSiguiente;
-    @FXML protected Label lblPaginaActual;
-    @FXML protected Label lblContador;
+    @FXML
+    protected ListView<String> listaEstantes;
+    @FXML
+    protected Button btnAnterior;
+    @FXML
+    protected Button btnSiguiente;
+    @FXML
+    protected Label lblPaginaActual;
+    @FXML
+    protected Label lblContador;
+
+    private String criterioBusqueda = "";
+    private Timeline debounceTimer;
 
     private int paginaActual = 1;
     private final int TAMANO_PAGINA = 100;
@@ -56,6 +78,7 @@ public class StockC {
 
         // 3. Escuchar la selección de la lista lateral para filtrar en tiempo real
         configurarFiltroEstantes();
+        configurarFiltroBusqueda();
 
         // 4. Primera carga de datos en la tabla
         actualizarTablaYComponentes();
@@ -98,16 +121,35 @@ public class StockC {
         });
     }
 
+    private void configurarFiltroBusqueda() {
+        if (txtBuscarGeneral == null) {
+            return;
+        }
+
+        txtBuscarGeneral.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (debounceTimer != null) {
+                debounceTimer.stop();
+            }
+
+            debounceTimer = new Timeline(new KeyFrame(Duration.millis(300), event -> {
+                criterioBusqueda = newValue != null ? newValue.trim() : "";
+                paginaActual = 1;
+                actualizarTablaYComponentes();
+            }));
+            debounceTimer.play();
+        });
+    }
+
     protected void actualizarTablaYComponentes() {
-        // Obtener piezas paginadas y filtradas por estante
-        List<Pieza> piezasFiltradas = piezaDAO.obtenerPiezas(paginaActual, TAMANO_PAGINA, filtroEstanteId);
+        List<Pieza> piezasFiltradas = piezaDAO.obtenerPiezas(paginaActual, TAMANO_PAGINA, filtroEstanteId,
+                criterioBusqueda);
         tablaStock.setItems(FXCollections.observableArrayList(piezasFiltradas));
 
         // Actualizar el contador de la esquina superior
         lblContador.setText("Mostrando: " + piezasFiltradas.size() + " artículos");
 
         // Calcular paginación dinámica basada en registros reales de SQL
-        int totalRegistros = piezaDAO.contarTotalPiezas(filtroEstanteId);
+        int totalRegistros = piezaDAO.contarTotalPiezas(filtroEstanteId, criterioBusqueda);
         int totalPaginas = (int) Math.ceil((double) totalRegistros / TAMANO_PAGINA);
         if (totalPaginas == 0)
             totalPaginas = 1;
@@ -134,7 +176,7 @@ public class StockC {
 
     @FXML
     private void paginaSiguiente() {
-        int totalRegistros = piezaDAO.contarTotalPiezas(filtroEstanteId);
+        int totalRegistros = piezaDAO.contarTotalPiezas(filtroEstanteId, criterioBusqueda);
         int totalPaginas = (int) Math.ceil((double) totalRegistros / TAMANO_PAGINA);
 
         if (paginaActual < totalPaginas) {
@@ -150,10 +192,10 @@ public class StockC {
 
         // 2. Resetea el filtro de estante
         this.filtroEstanteId = -1;
-
-        // 3. Limpia el buscador de texto si tienes uno (según tu FXML tienes
-        // txtBuscarGeneral)
-        // txtBuscarGeneral.clear();
+        this.criterioBusqueda = "";
+        if (txtBuscarGeneral != null) {
+            txtBuscarGeneral.clear();
+        }
 
         // 4. Recarga la tabla
         this.paginaActual = 1;
@@ -184,5 +226,10 @@ public class StockC {
         // Limpiamos la sesión antes de ir al login
         com.autopartes.Modelo.Sesion.setUsuario(null);
         GestorVistas.cambiarVista("Login.fxml");
+    }
+
+    @FXML
+    private void irAReporte(ActionEvent event) {
+        GestorVistas.cambiarVista("ReporteVenta.fxml");
     }
 }

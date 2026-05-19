@@ -31,7 +31,8 @@ public class GestorVistas {
             return nombreFxml.equals("CatalogoVendedor.fxml") ||
                     nombreFxml.equals("VistaStock.fxml") ||
                     nombreFxml.equals("CarritoVenta.fxml") ||
-                    nombreFxml.equals("ReporteVenta.fxml");
+                    nombreFxml.equals("ReporteVenta.fxml") ||
+                    nombreFxml.equals("Checkout.fxml"); 
         }
 
         if (rol.contains("almacenista")) {
@@ -44,12 +45,9 @@ public class GestorVistas {
             return true;
         }
 
-        // ¡ESTA LÍNEA ES LA QUE TE FALTA!
-        // Si no entra en ningún if anterior, debe retornar algo.
         return false;
     }
 
-    // Método estándar para cambios de vista simples
     public static void cambiarVista(String nombreFxml) {
         if (!tienePermiso(nombreFxml)) {
             String nombreRol = (Sesion.getUsuario() != null) ? Sesion.getUsuario().getRol() : "Desconocido";
@@ -60,47 +58,36 @@ public class GestorVistas {
         try {
             FXMLLoader loader = new FXMLLoader(GestorVistas.class.getResource("/com/autopartes/" + nombreFxml));
             Parent root = loader.load();
-
             Scene nuevaEscena = new Scene(root);
             ventanaPrincipal.setScene(nuevaEscena);
-
             actualizarTitulo();
             ventanaPrincipal.show();
-
         } catch (IOException e) {
             mostrarAlertaErrorCarga(nombreFxml, e);
         }
     }
 
-    // CORRECCIÓN: Método recuperado para controladores que inyectan datos entre sí
-    // (como CatalogoC)
     public static <T> T cambiarVistaConControlador(String nombreFxml) {
         if (!tienePermiso(nombreFxml)) {
             String nombreRol = (Sesion.getUsuario() != null) ? Sesion.getUsuario().getRol() : "Desconocido";
             mostrarAlertaAccesoDenegado(nombreRol, nombreFxml);
-            return null; // Detiene el flujo sin romper la interfaz gráfica previa
+            return null; 
         }
 
         try {
             FXMLLoader loader = new FXMLLoader(GestorVistas.class.getResource("/com/autopartes/" + nombreFxml));
             Parent root = loader.load();
-
             Scene nuevaEscena = new Scene(root);
             ventanaPrincipal.setScene(nuevaEscena);
-
             actualizarTitulo();
             ventanaPrincipal.show();
-
-            // Retorna el controlador de la nueva vista para edición dinámica
             return loader.getController();
-
         } catch (IOException e) {
             mostrarAlertaErrorCarga(nombreFxml, e);
             return null;
         }
     }
 
-    // Métodos auxiliares de soporte para evitar código repetido
     private static void actualizarTitulo() {
         if (ventanaPrincipal != null) {
             if (Sesion.getUsuario() != null) {
@@ -122,7 +109,6 @@ public class GestorVistas {
     private static void mostrarAlertaErrorCarga(String nombreFxml, IOException e) {
         System.err.println("Error crítico: No se pudo cargar el archivo " + nombreFxml);
         e.printStackTrace();
-
         Alert alertaError = new Alert(Alert.AlertType.ERROR);
         alertaError.setTitle("Error de Carga");
         alertaError.setHeaderText("No se pudo encontrar o renderizar la vista");

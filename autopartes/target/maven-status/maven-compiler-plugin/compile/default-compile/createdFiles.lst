@@ -6,7 +6,6 @@ com\autopartes\Controlador\AgregarPiezaC.class
 com\autopartes\Modelo\ReporteDAO$TotalVendidoCategoria.class
 com\autopartes\Modelo\Transacciones.class
 com\autopartes\Controlador\CarritoVentaC.class
-com\autopartes\Controlador\ReporteVentaC$DetalleVentaItem.class
 com\autopartes\Modelo\ItemCarrito.class
 com\autopartes\SystemInfo.class
 com\autopartes\Controlador\RegistroCompraC$CompraItem.class

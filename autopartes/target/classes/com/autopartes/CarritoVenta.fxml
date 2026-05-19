@@ -72,28 +72,38 @@
                 </HBox>
                 
                 <Button fx:id="btnAgregarItem" maxWidth="1.7976931348623157E308" onAction="#agregarItemAlCarrito" text="Agregar ítem" />
-                <Button fx:id="btnEliminarItem" maxWidth="1.7976931348623157E308" onAction="#eliminarItemSeleccionado" text="Eliminar ítem" />
+                
                 <Separator />
+                <Label style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #7f8c8d;" text="Modificar fila seleccionada" />
+                <HBox spacing="10.0">
+                    <children>
+                        <Button fx:id="btnDisminuir" maxWidth="1.7976931348623157E308" onAction="#disminuirCantidadItem" text="➖ Disminuir" HBox.hgrow="ALWAYS" />
+                        <Button fx:id="btnAumentar" maxWidth="1.7976931348623157E308" onAction="#aumentarCantidadItem" text="➕ Aumentar" HBox.hgrow="ALWAYS" />
+                    </children>
+                </HBox>
+                <Button fx:id="btnEliminarItem" maxWidth="1.7976931348623157E308" onAction="#eliminarItemSeleccionado" style="-fx-background-color: #fab1a0; -fx-text-fill: #c0392b;" text="Eliminar ítem" />
+                <Separator />
+                
                 <Label style="-fx-font-size: 15px; -fx-font-weight: bold;" text="Resumen de la orden" />
                 <HBox>
                     <children>
                         <Label text="Subtotal:" />
                         <Region HBox.hgrow="ALWAYS" />
-                        <Label fx:id="lblSubtotal" text="\$0.00" />
+                        <Label fx:id="lblSubtotal" text="0.00" />
                     </children>
                 </HBox>
                 <HBox>
                     <children>
                         <Label text="IVA:" />
                         <Region HBox.hgrow="ALWAYS" />
-                        <Label fx:id="lblIvaGeneral" text="\$0.00" />
+                        <Label fx:id="lblIvaGeneral" text="0.00" />
                     </children>
                 </HBox>
                 <HBox>
                     <children>
                         <Label text="TOTAL:" />
                         <Region HBox.hgrow="ALWAYS" />
-                        <Label fx:id="lblTotal" style="-fx-font-size: 14px; -fx-font-weight: bold;" text="\$0.00" />
+                        <Label fx:id="lblTotal" style="-fx-font-size: 14px; -fx-font-weight: bold;" text="0.00" />
                     </children>
                 </HBox>
                 <Label text="Método de pago:" />

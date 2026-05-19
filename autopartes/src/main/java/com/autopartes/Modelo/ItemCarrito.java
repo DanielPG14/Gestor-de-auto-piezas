@@ -1,57 +1,33 @@
 package com.autopartes.Modelo;
 
-/**
- * Representa un item dentro del carrito de ventas.
- * Contiene la pieza seleccionada, la cantidad y el subtotal calculado.
- */
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+
 public class ItemCarrito {
     private final Pieza pieza;
-    private final int cantidad;
-    private final double subtotal;
+    private final IntegerProperty cantidad; // Cambiado a Property de JavaFX
 
     public ItemCarrito(Pieza pieza, int cantidad) {
         this.pieza = pieza;
-        this.cantidad = cantidad;
-        this.subtotal = pieza.getPrecioCompra() * cantidad;
+        this.cantidad = new SimpleIntegerProperty(cantidad);
     }
 
-    public Pieza getPieza() {
-        return pieza;
-    }
-
-    public int getCantidad() {
-        return cantidad;
-    }
-
-    public double getSubtotal() {
-        return subtotal;
-    }
-
-    public double getPrecioUnitario() {
-        return pieza.getPrecioCompra();
-    }
-
-    public double getIvaPct() {
-        return 16.0;
-    }
-
-    public double getUtilidadPct() {
-        return 30.0;
-    }
+    public Pieza getPieza() { return pieza; }
+    
+    // --- Métodos para la propiedad cantidad ---
+    public int getCantidad() { return cantidad.get(); }
+    public void setCantidad(int cantidad) { this.cantidad.set(cantidad); }
+    public IntegerProperty cantidadProperty() { return cantidad; } // Permite a la tabla observar cambios
+    
+    public double getPrecioUnitario() { return pieza.getPrecioCompra(); }
+    public double getSubtotal() { return pieza.getPrecioCompra() * getCantidad(); }
+    public double getIvaPct() { return 16.0; }
+    public double getUtilidadPct() { return 30.0; }
 
     public double getTotalLinea() {
-        return subtotal + calcularIva();
+        double subtotal = getSubtotal();
+        return subtotal + (subtotal * (getIvaPct() / 100.0));
     }
-
-    public double calcularIva() {
-        return subtotal * (getIvaPct() / 100.0);
-    }
-
-    public double calcularTotalLinea() {
-        return getTotalLinea();
-    }
-
-    public ItemCarrito withCantidad(int nuevaCantidad) {
-        return new ItemCarrito(pieza, nuevaCantidad);
-    }
+    
+    public double calcularIva() { return getSubtotal() * (getIvaPct() / 100.0); }
 }

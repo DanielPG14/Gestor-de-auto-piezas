@@ -1,240 +1,166 @@
 package com.autopartes.Controlador;
 
-import com.autopartes.Modelo.*;
-// 💡 Agrega aquí los paquetes correctos de tu DAO y tus utilidades de vistas:
-
-import javafx.collections.ObservableList;
+import com.autopartes.Modelo.CarritoSingleton;
+import com.autopartes.Modelo.ItemCarrito;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 
-import java.io.FileWriter;
-import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 
-/**
- * CheckoutC: Controlador para la vista de Checkout (Pago y Generación de Factura)
- */
 public class CheckoutC {
 
-    // === COMPONENTES UI PARA DATOS DEL CLIENTE ===
-    @FXML private TextField txtRazonSocial;
-    @FXML private TextField txtRFC;
-    @FXML private TextField txtDireccionFiscal;
+    @FXML private TableView<ItemCarrito> tablaCheckout;
+    @FXML private TableColumn<ItemCarrito, String> colNombre;
+    @FXML private TableColumn<ItemCarrito, Integer> colCantidad;
+    @FXML private TableColumn<ItemCarrito, Double> colPrecio;
+    @FXML private TableColumn<ItemCarrito, Double> colTotal;
 
-    // === COMPONENTES UI PARA TOTALES ===
     @FXML private Label lblSubtotalVenta;
     @FXML private Label lblIvaVenta;
     @FXML private Label lblTotalVenta;
 
-    // === BOTONES DE ACCIÓN ===
-    @FXML private Button btnConfirmarVenta;
-    @FXML private Button btnVolverCarrito;
+    private final CarritoSingleton carrito = CarritoSingleton.getInstancia();
+    private static final String URL = "jdbc:mysql://localhost:3306/dba?serverTimezone=UTC";
+    private static final String USER = "root";
+    private static final String PASSWORD = "";
 
-    // === PROPIEDADES INTERNAS ===
-    private ObservableList<ItemCarrito> itemsCarrito;
-    private double subtotalVenta = 0;
-    private double ivaVenta = 0;
-    private double totalVenta = 0;
+    @FXML
+    public void initialize() {
+        colNombre.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getPieza().getNombre()));
+        colCantidad.setCellValueFactory(d -> d.getValue().cantidadProperty().asObject());
+        colPrecio.setCellValueFactory(d -> new SimpleDoubleProperty(d.getValue().getPrecioUnitario()).asObject());
+        colTotal.setCellValueFactory(d -> new SimpleDoubleProperty(d.getValue().getTotalLinea()).asObject());
 
-    // 💡 Instanciamos el DAO de manera limpia para evitar errores de contexto estático
-    private final VentaDAO ventaDAO = new VentaDAO();
-
-    /**
-     * Inicializa el controlador con datos del carrito.
-     */
-    public void inicializarDatos(ObservableList<ItemCarrito> items, 
-                                 double subtotal, double iva, double total) {
-        this.itemsCarrito = items;
-        this.subtotalVenta = subtotal;
-        this.ivaVenta = iva;
-        this.totalVenta = total;
-
-        actualizarEtiquetasTotales();
+        tablaCheckout.setItems(carrito.getItems());
+        cargarTotales();
     }
 
-    private void actualizarEtiquetasTotales() {
-        lblSubtotalVenta.setText(String.format("$%.2f", subtotalVenta));
-        lblIvaVenta.setText(String.format("$%.2f", ivaVenta));
-        lblTotalVenta.setText(String.format("$%.2f", totalVenta));
+    private void cargarTotales() {
+        double subtotal = carrito.getItems().stream().mapToDouble(ItemCarrito::getSubtotal).sum();
+        double iva = carrito.getItems().stream().mapToDouble(ItemCarrito::calcularIva).sum();
+        double total = subtotal + iva;
+
+        lblSubtotalVenta.setText(String.format("$%.2f", subtotal));
+        lblIvaVenta.setText(String.format("$%.2f", iva));
+        lblTotalVenta.setText(String.format("$%.2f", total));
     }
 
-    /**
-     * Manejador del botón "Confirmar Venta".
-     */
+    @FXML
+    private void volverCarrito(ActionEvent event) {
+        GestorVistas.cambiarVista("CarritoVenta.fxml");
+    }
+
     @FXML
     private void confirmarVenta(ActionEvent event) {
-        try {
-            if (!validarDatosCliente()) {
-                mostrarAlerta("Validación", "Por favor, complete todos los datos del cliente.");
-                return;
-            }
-
-            if (itemsCarrito == null || itemsCarrito.isEmpty()) {
-                mostrarAlerta("Carrito vacío", "No hay artículos para procesar.");
-                return;
-            }
-
-            String razonSocial = txtRazonSocial.getText().trim();
-            String rfc = txtRFC.getText().trim();
-            String direccion = txtDireccionFiscal.getText().trim();
-
-            String turno = obtenerTurnoActual();  
-            int IDusuarioOperador = obtenerIDUsuarioActual();  
-
-            List<ItemCarrito> items = new ArrayList<>(itemsCarrito);
-
-            Ticket ticket = new Ticket(
-                LocalDateTime.now(),
-                totalVenta,
-                "Efectivo",  
-                "Pagado"    
-            );
-
-            // 💡 Cambiado a 'ventaDAO' (instancia) en lugar de la Clase estática
-            boolean exito = this.ventaDAO.procesarVenta(ticket, items, totalVenta, turno, IDusuarioOperador);
-
-            if (exito) {
-                String ticketTexto = generarTicket(-1, razonSocial, rfc, direccion);
-                guardarTicketEnArchivo(ticketTexto, -1);
-
-                mostrarAlerta("Éxito", "Venta procesada exitosamente.\nTotal: $" + String.format("%.2f", totalVenta));
-                limpiarFormulario();
-                
-                // Redirección activa si lo requieres:
-                GestorVistas.cambiarVista("CatalogoVendedor.fxml");
-            } else {
-                mostrarAlerta("Error", "No se pudo procesar la venta. La transacción fue revertida.");
-            }
-
-        } catch (Exception e) {
-            System.err.println("ERROR en confirmarVenta: " + e.getMessage());
-            e.printStackTrace();
-            mostrarAlerta("Error inesperado", "Ocurrió un error: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Convierte ObservableList a List para el DAO.
-     */
-    private List<ItemCarrito> convertirItemsCarrito(ObservableList<ItemCarrito> items) {
-        return new ArrayList<>(items);
-    }
-
-    private int obtenerIdProdProv(Pieza pieza) {
-        // 💡 Dejamos la pieza por si planeas meter la consulta real a la BD después
-        return 1;  
-    }
-
-    private String obtenerTurnoActual() {
-        int hora = LocalDateTime.now().getHour();
-        return hora < 14 ? "Matutino" : "Vespertino";
-    }
-
-    private int obtenerIDUsuarioActual() {
-        return 1;
-    }
-
-    private boolean validarDatosCliente() {
-        return txtRazonSocial.getText() != null && !txtRazonSocial.getText().trim().isEmpty() &&
-               txtRFC.getText() != null && !txtRFC.getText().trim().isEmpty() &&
-               txtDireccionFiscal.getText() != null && !txtDireccionFiscal.getText().trim().isEmpty();
-    }
-
-    /**
-     * Genera la estructura del ticket/factura como String.
-     */
-    private String generarTicket(int idVenta, String razonSocial, String rfc, String direccion) {
-        StringBuilder ticket = new StringBuilder();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-        ticket.append("═══════════════════════════════════════════════════\n");
-        ticket.append("                      TICKET DE VENTA\n");
-        ticket.append("═══════════════════════════════════════════════════\n\n");
-        ticket.append(String.format("ID Venta: %d\n", idVenta));
-        ticket.append(String.format("Fecha: %s\n", LocalDateTime.now().format(formatter)));
-        ticket.append("\n");
-
-        ticket.append("--- CLIENTE ---\n");
-        ticket.append(String.format("Razón Social: %s\n", razonSocial));
-        ticket.append(String.format("RFC: %s\n", rfc));
-        ticket.append(String.format("Dirección: %s\n", direccion));
-        ticket.append("\n");
-
-        ticket.append("--- DETALLE DE PRODUCTOS ---\n");
-        ticket.append(String.format("%-30s | %10s | %8s | %6s | %10s\n", 
-            "Producto", "Costo Base", "Utilidad", "IVA%", "Total"));
-        ticket.append("─".repeat(80) + "\n");
-
-        for (ItemCarrito item : itemsCarrito) {
-            String nombre = item.getPieza().getNombre();
-            double precioBase = item.getPieza().getPrecioCompra();
-            int utilidad = (int) item.getUtilidadPct();
-            double ivaPct = item.getIvaPct();
-            double totalLinea = item.getTotalLinea();
-
-            // 💡 Se eliminó la variable local 'ivaCalculado' que no se usaba para quitar el warning
-
-            ticket.append(String.format("%-30s | $%9.2f | %7d%% | %5.1f%% | $%9.2f\n",
-                nombre.length() > 30 ? nombre.substring(0, 27) + "..." : nombre,
-                precioBase, utilidad, ivaPct, totalLinea));
+        if (carrito.getItems().isEmpty()) {
+            mostrarAlerta(Alert.AlertType.WARNING, "Operación no válida", "El carrito está vacío.");
+            return;
         }
 
-        ticket.append("─".repeat(80) + "\n");
+        try (Connection conn = java.sql.DriverManager.getConnection(URL, USER, PASSWORD)) {
+            conn.setAutoCommit(false); // Activamos control transaccional estricto
 
-        ticket.append(String.format("%-50s Subtotal: $%9.2f\n", "", subtotalVenta));
-        ticket.append(String.format("%-50s IVA:      $%9.2f\n", "", ivaVenta));
-        ticket.append("═".repeat(80) + "\n");
-        ticket.append(String.format("%-50s TOTAL:    $%9.2f\n", "", totalVenta));
-        ticket.append("═".repeat(80) + "\n\n");
-        ticket.append("¡Gracias por su compra!\n");
-        ticket.append("═══════════════════════════════════════════════════\n");
+            // === 1. VALIDACIÓN PREVIA DE INVENTARIO ===
+            String sqlCheckStock = "SELECT stock, nombre FROM piezas WHERE IDpieza = ?";
+            try (PreparedStatement psCheck = conn.prepareStatement(sqlCheckStock)) {
+                for (ItemCarrito item : carrito.getItems()) {
+                    psCheck.setInt(1, item.getPieza().getIdPieza());
+                    try (ResultSet rs = psCheck.executeQuery()) {
+                        if (rs.next()) {
+                            int stockActual = rs.getInt("stock");
+                            if (item.getCantidad() > stockActual) {
+                                conn.rollback(); // Cancelamos cualquier acción previa
+                                mostrarAlerta(Alert.AlertType.ERROR, "Inventario Insuficiente", 
+                                    "No puedes vender " + item.getCantidad() + " unidades de '" + 
+                                    rs.getString("nombre") + "'. Solo quedan " + stockActual + " en almacén.");
+                                return;
+                            }
+                        } else {
+                            conn.rollback();
+                            mostrarAlerta(Alert.AlertType.ERROR, "Error de Consistencia", 
+                                "La pieza con ID " + item.getPieza().getIdPieza() + " no existe en la BD.");
+                            return;
+                        }
+                    }
+                }
+            }
 
-        return ticket.toString();
-    }
+            // === 2. INSERTAR TICKET MAESTRO ===
+            String sqlTicket = "INSERT INTO ticket (Fecha, montoTotal, metodoPago, estado) VALUES (?, ?, ?, ?)";
+            PreparedStatement psTicket = conn.prepareStatement(sqlTicket, Statement.RETURN_GENERATED_KEYS);
+            psTicket.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
+            psTicket.setDouble(2, calcularTotal());
+            psTicket.setString(3, "Efectivo"); 
+            psTicket.setString(4, "Pagado");   
+            psTicket.executeUpdate();
 
-    private void guardarTicketEnArchivo(String ticket, int idVenta) {
-        try {
-            String nombreArchivo = String.format("Ticket_Venta_%d_%s.txt", 
-                idVenta, System.currentTimeMillis());
+            ResultSet rs = psTicket.getGeneratedKeys();
+            int ticketId = 0;
+            if (rs.next()) {
+                ticketId = rs.getInt(1);
+            }
+
+            // === 3. DISMINUIR INVENTARIO (UPDATE STOCK) & REGISTRAR DETALLES ===
+            String sqlRestarStock = "UPDATE piezas SET stock = stock - ? WHERE IDpieza = ?";
+            String sqlDetalle = "INSERT INTO lista_ticket (IDpieza, id_prod_prov, IDticket, cantidad, subtotal, precio_compra, utilidad_pct, iva_pct, precio_venta, total_linea) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             
-            try (FileWriter writer = new FileWriter(nombreArchivo)) {
-                writer.write(ticket);
-                System.out.println("Ticket guardado en: " + nombreArchivo);
+            try (PreparedStatement psRestar = conn.prepareStatement(sqlRestarStock);
+                 PreparedStatement psDetalle = conn.prepareStatement(sqlDetalle)) {
+
+                for (ItemCarrito item : carrito.getItems()) {
+                    // Lógica para restar existencias
+                    psRestar.setInt(1, item.getCantidad());
+                    psRestar.setInt(2, item.getPieza().getIdPieza());
+                    psRestar.addBatch();
+
+                    // Lógica para el detalle de la venta
+                    psDetalle.setInt(1, item.getPieza().getIdPieza());
+                    psDetalle.setInt(2, 1); // Proveedor por defecto
+                    psDetalle.setInt(3, ticketId);
+                    psDetalle.setInt(4, item.getCantidad());
+                    psDetalle.setDouble(5, item.getSubtotal());
+                    psDetalle.setDouble(6, item.getPieza().getPrecioCompra());
+                    psDetalle.setDouble(7, item.getUtilidadPct());
+                    psDetalle.setDouble(8, item.getIvaPct());
+                    psDetalle.setDouble(9, item.getPrecioUnitario());
+                    psDetalle.setDouble(10, item.getTotalLinea());
+                    psDetalle.addBatch();
+                }
+
+                psRestar.executeBatch();
+                psDetalle.executeBatch();
             }
-        } catch (IOException e) {
-            System.err.println("Error al guardar el ticket: " + e.getMessage());
-            e.printStackTrace();
+
+            conn.commit(); // Todo ha salido perfecto, consolidamos los cambios
+            
+            mostrarAlerta(Alert.AlertType.INFORMATION, "Venta Exitosa", "Ticket #" + ticketId + " generado e inventario actualizado.");
+            carrito.vaciarCarrito();
+            GestorVistas.cambiarVista("CatalogoVendedor.fxml");
+
+        } catch (SQLException e) {
+            System.err.println("Error en la transacción: " + e.getMessage());
+            mostrarAlerta(Alert.AlertType.ERROR, "Error SQL", "Fallo al procesar: " + e.getMessage());
         }
     }
 
-    private void limpiarFormulario() {
-        txtRazonSocial.clear();
-        txtRFC.clear();
-        txtDireccionFiscal.clear();
-        itemsCarrito.clear();
-        actualizarEtiquetasTotales();
+    private double calcularTotal() {
+        return carrito.getItems().stream().mapToDouble(ItemCarrito::getTotalLinea).sum();
     }
 
-    private void mostrarAlerta(String titulo, String mensaje) {
-        Alert alerta = new Alert(Alert.AlertType.INFORMATION);
+    private void mostrarAlerta(Alert.AlertType tipo, String titulo, String mensaje) {
+        Alert alerta = new Alert(tipo);
         alerta.setTitle(titulo);
         alerta.setHeaderText(null);
         alerta.setContentText(mensaje);
         alerta.showAndWait();
-    }
-
-    /**
-     * Manejador del botón "Volver al Carrito".
-     */
-    @FXML
-    private void volverCarrito(ActionEvent event) {
-        GestorVistas.cambiarVista("CarritoVenta.fxml");
     }
 }

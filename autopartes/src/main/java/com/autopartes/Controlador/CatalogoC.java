@@ -5,6 +5,8 @@ import com.autopartes.Modelo.ItemCarrito;
 import com.autopartes.Modelo.Pieza;
 import com.autopartes.Modelo.PiezaDAO;
 import com.autopartes.Modelo.Sesion;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -17,6 +19,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.util.Duration;
 
 import java.util.List;
 
@@ -40,6 +43,7 @@ public class CatalogoC {
     private final PiezaDAO piezaDAO = new PiezaDAO();
     private final ObservableList<Pieza> listaMaestraPiezas = FXCollections.observableArrayList();
     private FilteredList<Pieza> listaFiltradaPiezas;
+    private Timeline debounceTimer;
 
     @FXML
     public void initialize() {
@@ -86,21 +90,29 @@ public class CatalogoC {
      */
     private void configurarFiltroBusqueda() {
         txtBuscarGeneral.textProperty().addListener((observable, oldValue, newValue) -> {
-            listaFiltradaPiezas.setPredicate(pieza -> {
-                // Si el buscador está vacío, mostramos todos los registros
-                if (newValue == null || newValue.trim().isEmpty()) {
-                    return true;
-                }
+            if (debounceTimer != null) {
+                debounceTimer.stop();
+            }
 
-                String criterio = newValue.toLowerCase().trim();
+            debounceTimer = new Timeline(new KeyFrame(Duration.millis(300), event -> {
+                buscarPiezaEnBaseDeDatos(newValue);
+            }));
+            debounceTimer.play();
+        });
+    }
 
-                // Evalúa coincidencias por Nombre, Proveedor o Código de barra/proveedor
-                boolean coincideNombre = pieza.getNombre() != null && pieza.getNombre().toLowerCase().contains(criterio);
-                boolean coincideProveedor = pieza.getRazonSocialProveedor() != null && pieza.getRazonSocialProveedor().toLowerCase().contains(criterio);
-                boolean coincideCodigo = pieza.getCodigoProveedor() != null && pieza.getCodigoProveedor().toLowerCase().contains(criterio);
+    private void buscarPiezaEnBaseDeDatos(String criterioTexto) {
+        listaFiltradaPiezas.setPredicate(pieza -> {
+            if (criterioTexto == null || criterioTexto.trim().isEmpty()) {
+                return true;
+            }
 
-                return coincideNombre || coincideProveedor || coincideCodigo;
-            });
+            String criterio = criterioTexto.toLowerCase().trim();
+            boolean coincideNombre = pieza.getNombre() != null && pieza.getNombre().toLowerCase().contains(criterio);
+            boolean coincideProveedor = pieza.getRazonSocialProveedor() != null && pieza.getRazonSocialProveedor().toLowerCase().contains(criterio);
+            boolean coincideCodigo = pieza.getCodigoProveedor() != null && pieza.getCodigoProveedor().toLowerCase().contains(criterio);
+
+            return coincideNombre || coincideProveedor || coincideCodigo;
         });
     }
 

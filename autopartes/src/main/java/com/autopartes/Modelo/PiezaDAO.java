@@ -12,14 +12,14 @@ public class PiezaDAO {
     public List<Pieza> obtenerTodas() {
         List<Pieza> lista = new ArrayList<>();
 
-        String sql = "SELECT p.IDpieza, p.nombre, prov.nombre_razon_social, pp.codigo_proveedor, "
-                + "hp.precio_compra, p.imagen, p.IDestante, p.nivelAsigned, p.stock, e.capMax "
+        String sql = "SELECT p.*, pp.codigo_proveedor, prov.nombre_razon_social, "
+                + "COALESCE(hp.precio_compra, 0.00) AS precio_compra, e.capMax "
                 + "FROM piezas p "
-                + "LEFT JOIN estantes e ON p.IDestante = e.IDestante "
                 + "LEFT JOIN producto_proveedor pp ON p.IDpieza = pp.id_pieza "
                 + "LEFT JOIN proveedor prov ON pp.id_proveedor = prov.id_proveedor "
                 + "LEFT JOIN historial_precio hp ON pp.id_prod_prov = hp.id_prod_prov "
-                + "AND hp.fecha_fin IS NULL";
+                + "AND hp.fecha_fin IS NULL "
+                + "LEFT JOIN estantes e ON p.IDestante = e.IDestante";
 
         try (Connection db = Conexion.getInstancia();
                 PreparedStatement ps = db.prepareStatement(sql);
@@ -58,37 +58,47 @@ public class PiezaDAO {
     }
 
     // NUEVO MÉTODO: Trae piezas de forma paginada y permite filtrar por estante
-    // específico
-    public List<Pieza> obtenerPiezas(int pagina, int tamanoPagina, int idEstante) {
+    // específico y criterio de búsqueda.
+    public List<Pieza> obtenerPiezas(int pagina, int tamanoPagina, int idEstante, String criterioBusqueda) {
         List<Pieza> lista = new ArrayList<>();
 
-        // Base de la consulta idéntica a la tuva
-        String sql = "SELECT p.IDpieza, p.nombre, prov.nombre_razon_social, pp.codigo_proveedor, "
-                + "hp.precio_compra, p.imagen, p.IDestante, p.nivelAsigned, p.stock, e.capMax "
+        String sql = "SELECT p.*, pp.codigo_proveedor, prov.nombre_razon_social, "
+                + "COALESCE(hp.precio_compra, 0.00) AS precio_compra, e.capMax "
                 + "FROM piezas p "
-                + "LEFT JOIN estantes e ON p.IDestante = e.IDestante "
                 + "LEFT JOIN producto_proveedor pp ON p.IDpieza = pp.id_pieza "
                 + "LEFT JOIN proveedor prov ON pp.id_proveedor = prov.id_proveedor "
                 + "LEFT JOIN historial_precio hp ON pp.id_prod_prov = hp.id_prod_prov "
-                + "AND hp.fecha_fin IS NULL ";
+                + "AND hp.fecha_fin IS NULL "
+                + "LEFT JOIN estantes e ON p.IDestante = e.IDestante ";
 
-        // Agregar filtro condicional si no se seleccionó "Todos (-1)"
-        if (idEstante != -1) {
+        boolean tieneCriterio = criterioBusqueda != null && !criterioBusqueda.trim().isEmpty();
+        if (tieneCriterio) {
+            sql += "WHERE (p.nombre LIKE ? OR pp.codigo_proveedor LIKE ? OR prov.nombre_razon_social LIKE ?) ";
+            if (idEstante != -1) {
+                sql += "AND p.IDestante = ? ";
+            }
+        } else if (idEstante != -1) {
             sql += "WHERE p.IDestante = ? ";
         }
 
-        // Añadir ordenamiento lógico y límites para la paginación SQL
         sql += "ORDER BY p.IDpieza ASC LIMIT ? OFFSET ?";
 
         try (Connection db = Conexion.getInstancia();
                 PreparedStatement ps = db.prepareStatement(sql)) {
 
             int paramIdx = 1;
-            if (idEstante != -1) {
+            if (tieneCriterio) {
+                String buscado = "%" + criterioBusqueda.trim() + "%";
+                ps.setString(paramIdx++, buscado);
+                ps.setString(paramIdx++, buscado);
+                ps.setString(paramIdx++, buscado);
+                if (idEstante != -1) {
+                    ps.setInt(paramIdx++, idEstante);
+                }
+            } else if (idEstante != -1) {
                 ps.setInt(paramIdx++, idEstante);
             }
 
-            // Configurar tamaño del bloque y salto de registros (OFFSET)
             ps.setInt(paramIdx++, tamanoPagina);
             ps.setInt(paramIdx++, (pagina - 1) * tamanoPagina);
 
@@ -121,19 +131,45 @@ public class PiezaDAO {
         return lista;
     }
 
+    public List<Pieza> obtenerPiezas(int pagina, int tamanoPagina, int idEstante) {
+        return obtenerPiezas(pagina, tamanoPagina, idEstante, null);
+    }
+
+    public int contarTotalPiezas(int idEstante) {
+        return contarTotalPiezas(idEstante, null);
+    }
+
     // NUEVO MÉTODO: Cuenta cuántos registros totales cumplen el filtro para
     // calcular las páginas reales
-    public int contarTotalPiezas(int idEstante) {
-        String sql = "SELECT COUNT(*) FROM piezas";
-        if (idEstante != -1) {
-            sql += " WHERE IDestante = ?";
+    public int contarTotalPiezas(int idEstante, String criterioBusqueda) {
+        String sql = "SELECT COUNT(*) FROM piezas p "
+                + "LEFT JOIN producto_proveedor pp ON p.IDpieza = pp.id_pieza "
+                + "LEFT JOIN proveedor prov ON pp.id_proveedor = prov.id_proveedor ";
+
+        boolean tieneCriterio = criterioBusqueda != null && !criterioBusqueda.trim().isEmpty();
+        if (tieneCriterio) {
+            sql += "WHERE (p.nombre LIKE ? OR pp.codigo_proveedor LIKE ? OR prov.nombre_razon_social LIKE ?) ";
+            if (idEstante != -1) {
+                sql += "AND p.IDestante = ? ";
+            }
+        } else if (idEstante != -1) {
+            sql += "WHERE p.IDestante = ? ";
         }
 
         try (Connection db = Conexion.getInstancia();
                 PreparedStatement ps = db.prepareStatement(sql)) {
 
-            if (idEstante != -1) {
-                ps.setInt(1, idEstante);
+            int paramIdx = 1;
+            if (tieneCriterio) {
+                String buscado = "%" + criterioBusqueda.trim() + "%";
+                ps.setString(paramIdx++, buscado);
+                ps.setString(paramIdx++, buscado);
+                ps.setString(paramIdx++, buscado);
+                if (idEstante != -1) {
+                    ps.setInt(paramIdx++, idEstante);
+                }
+            } else if (idEstante != -1) {
+                ps.setInt(paramIdx++, idEstante);
             }
 
             try (ResultSet rs = ps.executeQuery()) {
