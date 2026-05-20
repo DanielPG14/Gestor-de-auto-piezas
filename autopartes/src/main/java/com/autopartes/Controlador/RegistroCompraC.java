@@ -1,3 +1,6 @@
+//Controlar para registrar compras
+//Muestra el stock actual de la pieza seleccionada y la información del proveedor seleccionado
+//Se usa en RegistrarCompra.fxml
 package com.autopartes.Controlador;
 
 import com.autopartes.Modelo.CompraDAO;
@@ -16,37 +19,23 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
-/**
- * RegistroCompraC: Controlador para registrar entradas de compra (abastecimiento).
- * Funcionalidad:
- * - Seleccionar pieza interna del catálogo
- * - Elegir proveedor desde ComboBox
- * - Ingresar código específico del proveedor
- * - Capturar nuevo costo de compra
- * - Ingresar cantidad de unidades
- * - Registrar entrada transaccionalmente
- */
 public class RegistroCompraC {
 
-    // === COMPONENTES UI PARA CAPTURA DE DATOS ===
     @FXML private ComboBox<Pieza> cmbPieza;
     @FXML private ComboBox<Proveedor> cmbProveedor;
     @FXML private TextField txtCodigoProveedor;
     @FXML private TextField txtPrecioCompra;
     @FXML private TextField txtCantidad;
 
-    // === COMPONENTES UI PARA INFORMACIÓN ===
     @FXML private Label lblStockActual;
     @FXML private Label lblProveedorInfo;
     @FXML private Button btnRegistrarCompra;
     @FXML private Button btnCancelar;
 
-    // === TABLA PARA HISTORIAL DE COMPRAS RECIENTES ===
     @FXML private TableView<CompraItem> tableViewHistorial;
     @FXML private TableColumn<CompraItem, String> colPieza;
     @FXML private TableColumn<CompraItem, String> colProveedor;
@@ -55,20 +44,14 @@ public class RegistroCompraC {
     @FXML private TableColumn<CompraItem, Integer> colCantidad;
     @FXML private TableColumn<CompraItem, String> colFecha;
 
-    // === DAO INSTANCES ===
     private PiezaDAO piezaDAO;
     private ProveedorDAO proveedorDAO;
     private CompraDAO compraDAO;
 
-    // === OBSERVABLE LISTS ===
     private ObservableList<Pieza> piezas;
     private ObservableList<Proveedor> proveedores;
     private ObservableList<CompraItem> historialCompras;
 
-    /**
-     * Inicializa el controlador.
-     * Carga datos de piezas, proveedores e historial.
-     */
     @FXML
     public void initialize() {
         piezaDAO = new PiezaDAO();
@@ -79,14 +62,11 @@ public class RegistroCompraC {
         proveedores = FXCollections.observableArrayList();
         historialCompras = FXCollections.observableArrayList();
 
-        // Cargar datos en ComboBox
         cargarPiezas();
         cargarProveedores();
 
-        // Configurar tabla de historial
         configurarTablaHistorial();
 
-        // Listeners
         cmbPieza.valueProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
                 actualizarStockActual(newVal);
@@ -99,57 +79,39 @@ public class RegistroCompraC {
             }
         });
 
-        // Cargar historial
         cargarHistorialCompras();
     }
 
-    /**
-     * Carga todas las piezas disponibles en el ComboBox.
-     */
     private void cargarPiezas() {
         try {
             piezas.clear();
             piezas.addAll(piezaDAO.obtenerTodas());
             cmbPieza.setItems(piezas);
-            System.out.println("✓ " + piezas.size() + " piezas cargadas.");
         } catch (Exception e) {
-            System.err.println("✗ Error al cargar piezas: " + e.getMessage());
+            System.err.println("Error al cargar piezas: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    /**
-     * Carga todos los proveedores disponibles en el ComboBox.
-     */
     private void cargarProveedores() {
         try {
             proveedores.clear();
             proveedores.addAll(proveedorDAO.obtenerTodos());
             cmbProveedor.setItems(proveedores);
-            System.out.println("✓ " + proveedores.size() + " proveedores cargados.");
         } catch (Exception e) {
-            System.err.println("✗ Error al cargar proveedores: " + e.getMessage());
+            System.err.println("Error al cargar proveedores: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    /**
-     * Actualiza la etiqueta de stock actual según la pieza seleccionada.
-     */
     private void actualizarStockActual(Pieza pieza) {
         lblStockActual.setText("Stock Actual: " + pieza.getStock() + " unidades");
     }
 
-    /**
-     * Actualiza la información del proveedor seleccionado.
-     */
     private void actualizarInfoProveedor(Proveedor proveedor) {
         lblProveedorInfo.setText("Proveedor: " + proveedor.getRazonSocial() + " - " + proveedor.getContacto());
     }
 
-    /**
-     * Configura las columnas de la tabla de historial.
-     */
     private void configurarTablaHistorial() {
         colPieza.setCellValueFactory(cellData -> 
             new SimpleStringProperty(cellData.getValue().getPieza()));
@@ -167,28 +129,19 @@ public class RegistroCompraC {
         tableViewHistorial.setItems(historialCompras);
     }
 
-    /**
-     * Carga el historial de compras recientes (últimas 50).
-     */
     private void cargarHistorialCompras() {
         try {
             historialCompras.clear();
             historialCompras.addAll(compraDAO.obtenerUltimasCompras(50));
-            System.out.println("✓ Historial de compras cargado.");
         } catch (Exception e) {
-            System.err.println("✗ Error al cargar historial: " + e.getMessage());
+            System.err.println("Error al cargar historial: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    /**
-     * Manejador del botón "Registrar Compra".
-     * Valida datos y ejecuta la persistencia transaccional.
-     */
     @FXML
     private void registrarCompra(ActionEvent event) {
         try {
-            // Validaciones
             Pieza pieza = cmbPieza.getValue();
             Proveedor proveedor = cmbProveedor.getValue();
             String codigoProveedor = txtCodigoProveedor.getText().trim();
@@ -228,7 +181,6 @@ public class RegistroCompraC {
                 return;
             }
 
-            // Registrar compra mediante DAO
             int idCompra = compraDAO.registrarCompra(pieza.getIdPieza(), proveedor.getIdProveedor(),
                     codigoProveedor, precioCompra, cantidad);
 
@@ -239,13 +191,8 @@ public class RegistroCompraC {
                     "Pieza: " + pieza.getNombre() + "\n" +
                     "Cantidad: " + cantidad + " unidades");
 
-                // Limpiar formulario
                 limpiarFormulario();
-
-                // Recargar historial
                 cargarHistorialCompras();
-
-                // Recargar stock
                 actualizarStockActual(pieza);
 
             } else {
@@ -261,9 +208,6 @@ public class RegistroCompraC {
         }
     }
 
-    /**
-     * Limpia el formulario después de registrar una compra.
-     */
     private void limpiarFormulario() {
         cmbPieza.setValue(null);
         cmbProveedor.setValue(null);
@@ -274,17 +218,11 @@ public class RegistroCompraC {
         lblProveedorInfo.setText("Proveedor: -");
     }
 
-    /**
-     * Manejador del botón "Cancelar".
-     */
     @FXML
     private void cancelar(ActionEvent event) {
         GestorVistas.cambiarVista("CatalogoVendedor.fxml");
     }
 
-    /**
-     * Muestra un diálogo de alerta.
-     */
     private void mostrarAlerta(String titulo, String mensaje) {
         Alert alerta = new Alert(Alert.AlertType.INFORMATION);
         alerta.setTitle(titulo);
@@ -293,13 +231,6 @@ public class RegistroCompraC {
         alerta.showAndWait();
     }
 
-    // =========================================================================
-    // CLASE INTERNA PARA MODELAR ITEM DE HISTORIAL
-    // =========================================================================
-
-    /**
-     * Clase interna para modelar un item del historial de compras.
-     */
     public static class CompraItem {
         private final String pieza;
         private final String proveedor;

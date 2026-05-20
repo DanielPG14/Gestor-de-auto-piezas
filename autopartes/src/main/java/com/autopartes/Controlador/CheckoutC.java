@@ -1,3 +1,6 @@
+// Controlador para la pantalla de checkout, donde se muestra el resumen de la venta
+// y se confirma la transacción. Aquí se maneja la lógica de validación de inventario,
+// inserción del ticket, actualización de stock y registro de detalles de venta.
 package com.autopartes.Controlador;
 
 import com.autopartes.Modelo.CarritoSingleton;

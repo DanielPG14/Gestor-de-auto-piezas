@@ -1,3 +1,4 @@
+// Controlador para gestionar el carrito de ventas, permitiendo agregar, modificar y eliminar ítems, así como calcular totales e impuestos.
 package com.autopartes.Controlador;
 
 import com.autopartes.Modelo.*;
@@ -43,7 +44,7 @@ public class CarritoVentaC {
         if (comboMetodoPago != null) {
             comboMetodoPago.setItems(
                     FXCollections.observableArrayList("Efectivo", "Tarjeta de Crédito/Débito", "Transferencia"));
-            comboMetodoPago.getSelectionModel().selectFirst(); // Evita que quede vacío por defecto
+            comboMetodoPago.getSelectionModel().selectFirst();
         }
         actualizarTotales();
     }
@@ -79,14 +80,10 @@ public class CarritoVentaC {
         }
     }
 
-    // ==========================================
-    // MÉTODOS CORREGIDOS CON REFRESH DE TABLA
-    // ==========================================
     @FXML
     private void aumentarCantidadItem(ActionEvent event) {
         ItemCarrito seleccion = tableViewCarrito.getSelectionModel().getSelectedItem();
         if (seleccion != null) {
-            // Llama de forma segura al Singleton modificado para forzar los Listeners
             carritoSingleton.modificarCantidad(seleccion, seleccion.getCantidad() + 1);
             tableViewCarrito.refresh();
         } else {
@@ -99,7 +96,6 @@ public class CarritoVentaC {
         ItemCarrito seleccion = tableViewCarrito.getSelectionModel().getSelectedItem();
         if (seleccion != null) {
             if (seleccion.getCantidad() > 1) {
-                // Llama de forma segura al Singleton modificado para forzar los Listeners
                 carritoSingleton.modificarCantidad(seleccion, seleccion.getCantidad() - 1);
                 tableViewCarrito.refresh();
             } else {

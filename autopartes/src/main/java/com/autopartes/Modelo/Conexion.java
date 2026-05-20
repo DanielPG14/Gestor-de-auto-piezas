@@ -1,3 +1,4 @@
+//Clase para conexion con DB, usa singleton
 package com.autopartes.Modelo;
 
 import java.sql.Connection;
@@ -8,13 +9,10 @@ public class Conexion {
     private static final String DB = "DBA";
     private static final String URL = "jdbc:mysql://localhost:3306/" + DB + "?serverTimezone=UTC";
     private static final String USER = "root"; 
-    private static final String PASSWORD = "12345";
-
-    // Eliminamos la variable estática única para evitar bloqueos entre hilos
+    private static final String PASSWORD = "";
 
     private Conexion() {}
 
-    // Ahora este método genera una conexión nueva y fresca cada vez que se solicita
     public static Connection getInstancia() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");

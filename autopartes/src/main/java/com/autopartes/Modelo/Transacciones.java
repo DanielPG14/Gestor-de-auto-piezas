@@ -10,7 +10,7 @@ public class Transacciones {
             db = Conexion.getInstancia();
             db.setAutoCommit(false); // Iniciamos transacción atómica
 
-            // 1. Actualizar el Stock en la tabla Piezas
+            //Actualizar el Stock en la tabla Piezas
             String sqlStock = "UPDATE Piezas SET stock = stock + ? WHERE IDpieza = ?";
             try (PreparedStatement psStock = db.prepareStatement(sqlStock)) {
                 psStock.setInt(1, esEntrada ? cantidad : -cantidad);
@@ -18,7 +18,7 @@ public class Transacciones {
                 psStock.executeUpdate();
             }
 
-            // 2. Registrar en la tabla Caja (vinculando al usuario)
+            //Registrar en la tabla Caja (vinculando al usuario)
             // Asumiendo que 'caja' tiene: IDpieza, IDusuario, fecha, tipo_movimiento
             String sqlCaja = "INSERT INTO caja (IDpieza, IDusuario, fecha) VALUES (?, ?, NOW())";
             try (PreparedStatement psCaja = db.prepareStatement(sqlCaja)) {

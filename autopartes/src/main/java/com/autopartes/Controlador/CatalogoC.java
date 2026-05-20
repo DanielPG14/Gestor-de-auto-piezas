@@ -1,3 +1,4 @@
+// Controlador para la vista del catálogo de piezas, con funcionalidades de búsqueda y adición al carrito.
 package com.autopartes.Controlador;
 
 import com.autopartes.Modelo.CarritoSingleton;

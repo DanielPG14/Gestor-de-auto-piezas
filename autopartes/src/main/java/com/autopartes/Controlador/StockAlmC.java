@@ -1,10 +1,12 @@
+//Controlador para gestionar el stock del almacén
+//Se usa en StockAlm.fxml
+//Alm es de almacenista, es una vista unica para este
 package com.autopartes.Controlador;
 
 import com.autopartes.Modelo.Pieza;
 import com.autopartes.Modelo.PiezaDAO;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import java.util.Optional;
 
 public class StockAlmC extends StockC {
 
@@ -41,6 +43,7 @@ public class StockAlmC extends StockC {
         });
     }
 
+    //Metodos para cargar proveedores y detalles de la pieza seleccionada en el formulario
     private void cargarProveedores() {
         cmbProveedores.getItems().clear();
         cmbProveedores.getItems().addAll(piezaDAO.obtenerRazonSocialProveedores());
@@ -62,6 +65,7 @@ public class StockAlmC extends StockC {
         }
     }
 
+    // Métodos para agregar, actualizar y limpiar formulario, además de mostrar alertas
     @FXML
     private void agregarPieza() {
         try {
@@ -80,11 +84,11 @@ public class StockAlmC extends StockC {
             }
 
             // Seteamos los valores extra que el DAO necesita para las tablas intermedias
-            nueva.setRazonSocialProveedor(proveedorSeleccionado);
-            nueva.setCodigoProveedor(txtCodigoProv.getText());
-            nueva.setPrecioCompra(Double.parseDouble(txtPrecio.getText()));
+            nueva.setRazonSocialProveedor(proveedorSeleccionado); //Set de razon social para mostrar en la tabla
+            nueva.setCodigoProveedor(txtCodigoProv.getText()); //Set de Codigo prov para mostrar en tabla
+            nueva.setPrecioCompra(Double.parseDouble(txtPrecio.getText())); //set de precio compra para mostrar en tabla
 
-            if (piezaDAO.registrarNuevaPieza(nueva)) {
+            if (piezaDAO.registrarNuevaPieza(nueva)) { // Si se registró correctamente
                 mostrarAlerta("Éxito", "Pieza registrada correctamente.");
                 limpiarFormulario();
                 actualizarTablaYComponentes();

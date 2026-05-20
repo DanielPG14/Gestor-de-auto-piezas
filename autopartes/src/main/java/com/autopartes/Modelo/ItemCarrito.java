@@ -1,3 +1,5 @@
+//singleton para representar un item en el carrito de compras
+//propiedades para la pieza, cantidad, precio unitario, subtotal, IVA y utilidad 
 package com.autopartes.Modelo;
 
 import javafx.beans.property.IntegerProperty;

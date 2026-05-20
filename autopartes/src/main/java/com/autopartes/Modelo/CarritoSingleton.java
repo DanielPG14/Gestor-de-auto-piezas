@@ -1,3 +1,7 @@
+//Singleton: Clase que hace una única instancia del carrito de compras para toda la aplicación 
+//permitiendo compartir el mismo carrito entre diferentes vistas y controladores sin necesidad de pasar referencias constantemente. 
+// Facilita la gestión centralizada del carrito, 
+// asegurando que todas las partes de la aplicación trabajen con el mismo conjunto de datos.
 package com.autopartes.Modelo;
 
 import javafx.collections.FXCollections;
@@ -38,16 +42,9 @@ public class CarritoSingleton {
         }
     }
 
-    /**
-     * 🔥 NUEVO MÉTODO CENTRALIZADO
-     * Modifica la cantidad de un ítem y fuerza la notificación a la TableView y a los Listeners de totales.
-     */
     public void modificarCantidad(ItemCarrito item, int nuevaCantidad) {
         if (items.contains(item) && nuevaCantidad > 0) {
             item.setCantidad(nuevaCantidad);
-            
-            // Reemplazar el elemento en su misma posición dispara el ListChangeListener 
-            // que actualiza los lblSubtotal, lblIvaGeneral y lblTotal automáticamente.
             int index = items.indexOf(item);
             items.set(index, item);
         }

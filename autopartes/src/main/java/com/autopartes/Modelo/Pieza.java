@@ -15,6 +15,7 @@ public class Pieza {
     private final IntegerProperty stock;
     private final IntegerProperty capMax;
 
+    // CONSTRUCTOR COMPLETO (usado para cargar piezas desde la base de datos)
     public Pieza(int idPieza, String nombre, String razonSocialProveedor, String codigoProveedor,
             double precioCompra, String imagen, String idEstante, int nivelAsigned,
             int stock, int capMax) {
@@ -31,6 +32,9 @@ public class Pieza {
     }
 
     // CONSTRUCTOR SIMPLIFICADO (para crear nuevas piezas desde el formulario)
+    //utiliza valores predeterminados para campos que no se ingresan en el formulario, como el ID (que se asignará automáticamente)
+    // el proveedor (que se puede actualizar después) 
+    // y la imagen (que se establece como una imagen genérica por defecto)
     public Pieza(String nombre, String idEstante, int nivelAsigned, int stock, int capMax) {
         this.idPieza = new SimpleIntegerProperty(0);
         this.nombre = new SimpleStringProperty(nombre);
