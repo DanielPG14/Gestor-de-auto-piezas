@@ -1,6 +1,6 @@
+//Controlador para agregar piezas al inventario, con validación de campos y manejo de errores.
 package com.autopartes.Controlador;
 
-import com.autopartes.Modelo.Conexion;
 import com.autopartes.Modelo.Pieza;
 import com.autopartes.Modelo.PiezaDAO;
 import javafx.collections.FXCollections;
@@ -9,13 +9,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage; // 👈 CORRECCIÓN 1: Importación de JavaFX añadida
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList; // 👈 CORRECCIÓN 1: Importaciones de Java Util añadidas
+import javafx.stage.Stage;
+import java.util.ArrayList;
 import java.util.List;
 
 public class AgregarPiezaC {
@@ -25,7 +20,7 @@ public class AgregarPiezaC {
     @FXML private ComboBox<String> cbProveedor;
     @FXML private TextField txtPrecioCompra;
     @FXML private TextField txtCodigoProveedor;
-    @FXML private TextField txtEstante; // 👈 CORRECCIÓN 3: Añadido campo para capturar el ID del estante físico
+    @FXML private TextField txtEstante;
     @FXML private Button btnAgregarPieza;
 
     private PiezaDAO piezaDAO = new PiezaDAO();
@@ -33,7 +28,6 @@ public class AgregarPiezaC {
 
     @FXML
     public void initialize() {
-        // CORRECCIÓN 2: Cargamos los proveedores de forma segura
         proveedores = obtenerProveedores();
         cbProveedor.setItems(FXCollections.observableArrayList(proveedores));
         
@@ -45,11 +39,10 @@ public class AgregarPiezaC {
     }
 
     private List<String> obtenerProveedores() {
-        // CORRECCIÓN 2: Si el método aún no está en el DAO, manejamos una lista de respaldo para evitar que la app truene
         List<String> lista = piezaDAO.obtenerRazonSocialProveedores();
         if (lista == null || lista.isEmpty()) {
             lista = new ArrayList<>();
-            lista.add("Proveedor General S.A."); // Respaldo temporal si la tabla proveedor está vacía
+            lista.add("Proveedor General S.A.");
         }
         return lista;
     }
@@ -58,7 +51,7 @@ public class AgregarPiezaC {
     private void guardarPieza() {
         try {
             String nombre = txtNombre.getText().trim();
-            String estante = txtEstante != null ? txtEstante.getText().trim() : "1"; // Protección de IDestante
+            String estante = txtEstante != null ? txtEstante.getText().trim() : "1";
             String proveedor = cbProveedor.getSelectionModel().getSelectedItem();
             String codigoProveedor = txtCodigoProveedor.getText().trim();
             
@@ -77,7 +70,6 @@ public class AgregarPiezaC {
                 return;
             }
 
-            // CORRECCIÓN 3: Pasamos 'estante' en lugar de 'null' para cumplir con la firma del constructor y la FK de la BD
             Pieza nuevaPieza = new Pieza(0, nombre, proveedor, codigoProveedor, precioCompra, "default.jpg", estante, nivel, stock, 100);
 
             boolean resultado = piezaDAO.registrarNuevaPieza(nuevaPieza);

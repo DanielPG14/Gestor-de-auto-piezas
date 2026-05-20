@@ -1,3 +1,6 @@
+//Controlador para vista de stock en cajero
+//Permite visualizar el stock de piezas, filtrar por estante y buscar por nombre o ID
+//Solo operaciones de consulta, sin edición ni eliminación
 package com.autopartes.Controlador;
 
 import com.autopartes.Modelo.Pieza;
@@ -22,7 +25,6 @@ import java.util.List;
 
 public class StockC {
 
-    // Componentes emparejados perfectamente con los fx:id de tu FXML
     @FXML
     protected TableView<Pieza> tablaStock;
     @FXML
@@ -63,9 +65,6 @@ public class StockC {
 
     @FXML
     public void initialize() {
-        // 1. Vincular las columnas de la tabla con las propiedades del modelo Pieza
-        // Nota: Asegúrate de que estos nombres coincidan con los atributos/getters de
-        // tu clase Pieza.java
         colID.setCellValueFactory(new PropertyValueFactory<>("idPieza"));
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
         colEstante.setCellValueFactory(new PropertyValueFactory<>("idEstante"));
@@ -73,14 +72,11 @@ public class StockC {
         colStock.setCellValueFactory(new PropertyValueFactory<>("stock"));
         colCapMax.setCellValueFactory(new PropertyValueFactory<>("capMax"));
 
-        // 2. Cargar los estantes reales desde la base de datos SQL
         cargarEstantesDesdeBD();
 
-        // 3. Escuchar la selección de la lista lateral para filtrar en tiempo real
         configurarFiltroEstantes();
         configurarFiltroBusqueda();
 
-        // 4. Primera carga de datos en la tabla
         actualizarTablaYComponentes();
     }
 
@@ -145,10 +141,8 @@ public class StockC {
                 criterioBusqueda);
         tablaStock.setItems(FXCollections.observableArrayList(piezasFiltradas));
 
-        // Actualizar el contador de la esquina superior
         lblContador.setText("Mostrando: " + piezasFiltradas.size() + " artículos");
 
-        // Calcular paginación dinámica basada en registros reales de SQL
         int totalRegistros = piezaDAO.contarTotalPiezas(filtroEstanteId, criterioBusqueda);
         int totalPaginas = (int) Math.ceil((double) totalRegistros / TAMANO_PAGINA);
         if (totalPaginas == 0)
@@ -158,10 +152,8 @@ public class StockC {
             paginaActual = totalPaginas;
         }
 
-        // Sincronizar etiqueta de páginas de tu FXML
         lblPaginaActual.setText("Página " + paginaActual + " de " + totalPaginas);
 
-        // Bloqueo inteligente de botones de navegación
         btnAnterior.setDisable(paginaActual == 1);
         btnSiguiente.setDisable(paginaActual >= totalPaginas);
     }
@@ -187,23 +179,18 @@ public class StockC {
 
     @FXML
     private void filtrarStock() {
-        // 1. Resetea el combo box o la lista si es necesario
         listaEstantes.getSelectionModel().selectFirst();
 
-        // 2. Resetea el filtro de estante
         this.filtroEstanteId = -1;
         this.criterioBusqueda = "";
         if (txtBuscarGeneral != null) {
             txtBuscarGeneral.clear();
         }
 
-        // 4. Recarga la tabla
         this.paginaActual = 1;
         actualizarTablaYComponentes();
     }
 
-    // Métodos de navegación y barra superior definidos en tu FXML (vacíos para que
-    // no te den error al compilar)
     @FXML
     private void irACatalogo() {
         GestorVistas.cambiarVista("CatalogoVendedor.fxml");
@@ -216,14 +203,11 @@ public class StockC {
 
     @FXML
     private void irAMapaAlmacen() {
-        // ¡OJO AQUÍ! Asegúrate de que el nombre del archivo sea exactamente
-        // como está en tu carpeta (ej. "MapaAlmacen.fxml")
         GestorVistas.cambiarVista("MapaAlmacen.fxml");
     }
 
     @FXML
     private void cerrarSesion() {
-        // Limpiamos la sesión antes de ir al login
         com.autopartes.Modelo.Sesion.setUsuario(null);
         GestorVistas.cambiarVista("Login.fxml");
     }

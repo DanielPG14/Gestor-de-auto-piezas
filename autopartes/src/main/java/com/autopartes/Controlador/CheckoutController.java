@@ -1,3 +1,5 @@
+//Es parte del otro checkout, sirve para procesar la venta
+//Este se encarga de validar datos, mensajes de exito y error, y limpiar el formulario despues de la venta
 package com.autopartes.Controlador;
 
 import com.autopartes.Modelo.*;
@@ -34,7 +36,6 @@ public class CheckoutController {
                 "Pagado"
             );
 
-            // Obtenemos los items REALES del Singleton
             List<ItemCarrito> items = construirItemsDelCarrito();
 
             if (items.isEmpty()) {
@@ -50,7 +51,6 @@ public class CheckoutController {
             if (exito) {
                 mostrarExito("¡Venta procesada exitosamente! Total: $" + String.format("%.2f", montoTotal));
                 limpiarFormulario();
-                // Si la venta se guardó, vaciamos el carrito del sistema
                 CarritoSingleton.getInstancia().vaciarCarrito();
             } else {
                 mostrarError("Error al procesar la venta. La transacción fue revertida.");
@@ -62,7 +62,6 @@ public class CheckoutController {
     }
 
     private List<ItemCarrito> construirItemsDelCarrito() {
-        // Tomamos los productos que están guardados en memoria globalmente
         return new ArrayList<>(CarritoSingleton.getInstancia().getItems());
     }
 

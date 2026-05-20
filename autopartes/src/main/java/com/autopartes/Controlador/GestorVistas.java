@@ -1,3 +1,4 @@
+//Controlador para gestionar los permisos a cada vista de fxml segun rol, similar a rutas en una aplicación web
 package com.autopartes.Controlador;
 
 import com.autopartes.Modelo.Sesion;

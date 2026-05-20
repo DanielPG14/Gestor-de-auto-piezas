@@ -1,3 +1,5 @@
+//Controlador para mostrar el historial de ventas
+//Se usa en ReporteVenta.fxml
 package com.autopartes.Controlador;
 
 import javafx.collections.FXCollections;
@@ -68,6 +70,7 @@ public class ReporteVentaC {
     }
 
     // POJO para mapeo de celdas
+    //POJO: Plain Old Java Object, es una clase simple que se utiliza para representar datos sin lógica adicional. En este caso, VentaItem es un POJO que representa una venta con sus atributos idVenta, fecha y total.
     public static class VentaItem {
         private final int idVenta;
         private final String fecha;

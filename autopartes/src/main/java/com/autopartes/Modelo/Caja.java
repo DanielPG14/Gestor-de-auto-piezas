@@ -1,10 +1,7 @@
 package com.autopartes.Modelo;
 
 import java.time.LocalDateTime;
-
-/**
- * Modelo de Caja (Registro de movimientos de dinero).
- */
+//Clase que representa la entidad "Caja" en el sistema de gestión de autopartes
 public class Caja {
     private int IDcaja;
     private int IDticket;

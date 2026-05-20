@@ -1,3 +1,5 @@
+//Controlador para mostrar reportes de ventas
+//Se usa en Reporte.fxml
 package com.autopartes.Controlador;
 
 import com.autopartes.Modelo.ReporteDAO;

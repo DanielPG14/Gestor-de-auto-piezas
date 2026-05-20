@@ -1,3 +1,4 @@
+//Clase para manejar sesioes
 package com.autopartes.Modelo;
 
 public class Sesion {

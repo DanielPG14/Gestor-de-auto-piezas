@@ -1,9 +1,8 @@
+//DAO: data access object para la entidad "Compra".
+//Encapsula toda la lógica de acceso a datos relacionada con las compras,
 package com.autopartes.Modelo;
 
 import com.autopartes.Controlador.RegistroCompraC;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,43 +10,22 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-
-/**
- * CompraDAO: Data Access Object para gestionar transacciones de compra (abastecimiento).
- * Maneja:
- * - Inserción de compras (cabecera)
- * - Gestión de relaciones producto-proveedor
- * - Actualización de historial de precios (3FN)
- * - Incremento de stock
- * - Control transaccional (COMMIT/ROLLBACK)
- */
+/*
+Metodos:
+- registrarCompra: Registra una nueva compra, actualizando el stock y el historial de precios.
+- obtenerUltimasCompras: Devuelve una lista de las últimas compras realizadas, con detalles
+- verificarOInsertarProductoProveedor: Verifica si existe la relación producto-proveedor y la inserta si no existe.
+- cerrarHistorialPrecioAnterior: Cierra el registro de precio anterior para un producto-proveedor.
+- insertarHistorialPrecio: Inserta un nuevo registro de precio para un producto-proveedor.
+*/
 public class CompraDAO {
-
+    //Referencia a la conexión de base de datos
     private Connection db;
 
-    /**
-     * Constructor: Obtiene la instancia de conexión a BD.
-     */
     public CompraDAO() {
         this.db = Conexion.getInstancia();
     }
 
-    /**
-     * Registra una compra completa en una transacción.
-     * Pasos:
-     * A - Verificar/crear relación en tabla producto_proveedor
-     * B - Actualizar historial_precio (cierra vigencia anterior)
-     * C - Insertar nueva entrada de precio
-     * D - Incrementar stock de la pieza
-     * E - Registrar cabecera de compra
-     *
-     * @param idProducto   ID de la pieza
-     * @param idProveedor  ID del proveedor
-     * @param codigoProveedor Código asignado por el proveedor
-     * @param precioCompra Costo de adquisición
-     * @param cantidad     Cantidad de unidades
-     * @return ID de compra si es exitoso, -1 si falla
-     */
     public int registrarCompra(int idProducto, int idProveedor, String codigoProveedor,
                                double precioCompra, int cantidad) {
         int idCompra = -1;
@@ -55,45 +33,39 @@ public class CompraDAO {
         try {
             db.setAutoCommit(false);
 
-            // === PASO A: Verificar/crear relación producto-proveedor ===
             int idProdProv = verificarOInsertarProductoProveedor(idProducto, idProveedor, codigoProveedor);
             if (idProdProv <= 0) {
                 throw new SQLException("No se pudo establecer relación producto-proveedor.");
             }
 
-            // === PASO B: Cerrar vigencia del precio anterior ===
             cerrarHistorialPrecioAnterior(idProdProv);
 
-            // === PASO C: Insertar nuevo precio en historial ===
             boolean precioInsertado = insertarHistorialPrecio(idProdProv, precioCompra);
             if (!precioInsertado) {
                 throw new SQLException("No se pudo registrar el nuevo precio.");
             }
 
-            // === PASO D: Incrementar stock ===
             boolean stockActualizado = incrementarStock(idProducto, cantidad);
             if (!stockActualizado) {
                 throw new SQLException("No se pudo actualizar el stock.");
             }
 
-            // === PASO E: Registrar compra (cabecera) ===
             idCompra = insertarCompra(idProducto, idProveedor, precioCompra, cantidad);
             if (idCompra <= 0) {
                 throw new SQLException("No se pudo registrar la compra.");
             }
 
-            // COMMIT exitoso
             db.commit();
-            System.out.println("✓ Compra " + idCompra + " registrada exitosamente.");
+            System.out.println("Compra " + idCompra + " registrada exitosamente.");
 
         } catch (SQLException e) {
-            System.err.println("✗ Error durante transacción de compra: " + e.getMessage());
+            System.err.println("Error durante transacción de compra: " + e.getMessage());
             e.printStackTrace();
 
             try {
                 if (db != null && !db.isClosed()) {
                     db.rollback();
-                    System.out.println("✓ Transacción de compra revertida (ROLLBACK).");
+                    System.out.println("Transacción de compra revertida (ROLLBACK).");
                 }
             } catch (SQLException ex) {
                 System.err.println("Error al hacer rollback: " + ex.getMessage());
@@ -114,34 +86,28 @@ public class CompraDAO {
         return idCompra;
     }
 
-    /**
-     * PASO A: Verifica si existe relación producto-proveedor.
-     * Si no existe, la crea e inserta el código específico.
-     *
-     * @return ID de la relación (id_prod_prov), -1 si falla
-     */
     private int verificarOInsertarProductoProveedor(int idProducto, int idProveedor, String codigoProveedor) {
         int idProdProv = -1;
 
         try {
-            // Buscar relación existente
+            //SELECT para verificar si ya existe la relación producto-proveedor
             String sqlBuscar = "SELECT id_prod_prov FROM producto_proveedor " +
                     "WHERE id_producto = ? AND id_proveedor = ? LIMIT 1";
 
+            //Busca la relación producto-proveedor existente y obtiene su ID de proveedor
             try (PreparedStatement psBuscar = db.prepareStatement(sqlBuscar)) {
-                psBuscar.setInt(1, idProducto);
-                psBuscar.setInt(2, idProveedor);
+                psBuscar.setInt(1, idProducto); // Establece el ID del producto
+                psBuscar.setInt(2, idProveedor); // Establece el ID del proveedor
 
                 try (ResultSet rs = psBuscar.executeQuery()) {
                     if (rs.next()) {
                         idProdProv = rs.getInt("id_prod_prov");
-                        System.out.println("Relación encontrada: id_prod_prov=" + idProdProv);
                         return idProdProv;
                     }
                 }
             }
 
-            // Si no existe, crear nueva relación
+            // Si no existe, inserta la nueva relación producto-proveedor y obtiene su ID generado
             String sqlInsertar = "INSERT INTO producto_proveedor (id_producto, id_proveedor, codigo_proveedor) " +
                     "VALUES (?, ?, ?)";
 
@@ -154,7 +120,6 @@ public class CompraDAO {
                 try (ResultSet rsGenerated = psInsertar.getGeneratedKeys()) {
                     if (rsGenerated.next()) {
                         idProdProv = rsGenerated.getInt(1);
-                        System.out.println("Relación creada: id_prod_prov=" + idProdProv);
                     }
                 }
             }
@@ -167,19 +132,15 @@ public class CompraDAO {
         return idProdProv;
     }
 
-    /**
-     * PASO B: Cierra la vigencia del precio anterior en historial_precio.
-     * Actualiza fecha_fin = NOW() para el registro activo.
-     */
     private void cerrarHistorialPrecioAnterior(int idProdProv) {
         try {
+            //UPDATE para cerrar el historial de precio anterior estableciendo la fecha de fin a NOW()
             String sql = "UPDATE historial_precio SET fecha_fin = NOW() " +
                     "WHERE id_prod_prov = ? AND fecha_fin IS NULL";
 
             try (PreparedStatement ps = db.prepareStatement(sql)) {
                 ps.setInt(1, idProdProv);
                 ps.executeUpdate();
-                System.out.println("Precio anterior cerrado para id_prod_prov=" + idProdProv);
             }
 
         } catch (SQLException e) {
@@ -188,14 +149,9 @@ public class CompraDAO {
         }
     }
 
-    /**
-     * PASO C: Inserta nueva entrada en historial_precio.
-     * Registra el precio vigente con fecha_inicio = NOW() y fecha_fin = NULL.
-     *
-     * @return true si es exitoso, false si falla
-     */
     private boolean insertarHistorialPrecio(int idProdProv, double precioCompra) {
         try {
+            //INSERT para registrar el nuevo precio de compra en el historial de precios
             String sql = "INSERT INTO historial_precio (id_prod_prov, precio_compra, fecha_inicio, fecha_fin) " +
                     "VALUES (?, ?, NOW(), NULL)";
 
@@ -204,7 +160,6 @@ public class CompraDAO {
                 ps.setDouble(2, precioCompra);
                 ps.executeUpdate();
 
-                System.out.println("Precio registrado en historial: $" + String.format("%.2f", precioCompra));
                 return true;
             }
 
@@ -216,14 +171,9 @@ public class CompraDAO {
         return false;
     }
 
-    /**
-     * PASO D: Incrementa el stock de una pieza.
-     * UPDATE piezas SET stock = stock + cantidad WHERE IDpieza = ?
-     *
-     * @return true si es exitoso, false si falla
-     */
     private boolean incrementarStock(int idPieza, int cantidad) {
         try {
+            //UPDATE para incrementar el stock de la pieza comprada sumando la cantidad adquirida
             String sql = "UPDATE piezas SET stock = stock + ? WHERE IDpieza = ?";
 
             try (PreparedStatement ps = db.prepareStatement(sql)) {
@@ -232,7 +182,6 @@ public class CompraDAO {
 
                 int filasActualizadas = ps.executeUpdate();
                 if (filasActualizadas > 0) {
-                    System.out.println("Stock incrementado: +" + cantidad + " unidades para IDpieza=" + idPieza);
                     return true;
                 }
             }
@@ -245,15 +194,11 @@ public class CompraDAO {
         return false;
     }
 
-    /**
-     * PASO E: Inserta la cabecera de la compra en tabla compra.
-     *
-     * @return ID de la compra generada, -1 si falla
-     */
     private int insertarCompra(int idProducto, int idProveedor, double precioCompra, int cantidad) {
         int idCompra = -1;
 
         try {
+            //INSERT para registrar la compra en la tabla de compras, incluyendo el cálculo del total (precio * cantidad)
             String sql = "INSERT INTO compra (id_producto, id_proveedor, fecha, precio_compra, cantidad, total) " +
                     "VALUES (?, ?, NOW(), ?, ?, ?)";
 
@@ -268,7 +213,6 @@ public class CompraDAO {
                 try (ResultSet rs = ps.getGeneratedKeys()) {
                     if (rs.next()) {
                         idCompra = rs.getInt(1);
-                        System.out.println("Compra insertada: ID=" + idCompra);
                     }
                 }
             }
@@ -281,17 +225,12 @@ public class CompraDAO {
         return idCompra;
     }
 
-    /**
-     * Obtiene las últimas compras registradas (límite configurable).
-     * Útil para el historial en RegistroCompraC.
-     *
-     * @param limite Número máximo de registros a traer
-     * @return Lista de CompraItem
-     */
     public List<RegistroCompraC.CompraItem> obtenerUltimasCompras(int limite) {
         List<RegistroCompraC.CompraItem> compras = new ArrayList<>();
 
         try {
+            //SELECT para obtener las últimas compras realizadas, incluyendo detalles como el nombre de la pieza, 
+            //el proveedor, el código del proveedor, el precio de compra, la cantidad y la fecha de compra
             String sql = "SELECT p.nombre, prov.razon_social, pp.codigo_proveedor, " +
                     "c.precio_compra, c.cantidad, c.fecha " +
                     "FROM compra c " +
@@ -306,7 +245,7 @@ public class CompraDAO {
                 ps.setInt(1, limite);
 
                 try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) {
+                    while (rs.next()) { // Extrae los datos de cada compra y los agrega a la lista de compras
                         String pieza = rs.getString("nombre");
                         String proveedor = rs.getString("razon_social");
                         String codigo = rs.getString("codigo_proveedor");
@@ -319,10 +258,10 @@ public class CompraDAO {
                 }
             }
 
-            System.out.println("✓ " + compras.size() + " compras cargadas.");
+            System.out.println("" + compras.size() + " compras cargadas.");
 
         } catch (SQLException e) {
-            System.err.println("✗ Error en obtenerUltimasCompras: " + e.getMessage());
+            System.err.println("Error en obtenerUltimasCompras: " + e.getMessage());
             e.printStackTrace();
         }
 

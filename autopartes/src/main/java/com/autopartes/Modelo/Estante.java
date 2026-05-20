@@ -1,3 +1,4 @@
+//Clase para representar la entidad "Estante" en el sistema de gestión de autopartes,
 package com.autopartes.Modelo;
 
 public class Estante {
