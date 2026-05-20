@@ -1,83 +1,109 @@
 /* =======================================================
-   HOJA DE ESTILOS GLOBAL - SISTEMA DE AUTOPARTES
+   HOJA DE ESTILOS GLOBAL - SISTEMA DE AUTOPARTES (TEMA AZUL PREMIUM)
    ======================================================= */
 
 /* =======================================================
-   1. TARJETAS DE INVENTARIO (VISTA STOCK / CATÁLOGO)
+   1. FONDOS Y TIPOGRAFÍA GLOBAL
    ======================================================= */
+.root {
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-background-color: #F4F7F6; /* Gris-azulado muy tenue para descansar la vista */
+}
 
-/* Tarjeta normal / Stock bueno */
+/* =======================================================
+   2. TARJETAS DE INVENTARIO Y CONTENEDORES (VISTA STOCK / CATÁLOGO)
+   ======================================================= */
 .tarjeta-stock-normal {
     -fx-background-color: #FFFFFF;
-    -fx-border-color: #E0E0E0;
+    -fx-border-color: #E2E8F0;
     -fx-border-width: 1;
     -fx-border-radius: 8;
     -fx-background-radius: 8;
-    /* Una sombra sutil para dar profundidad */
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 3);
+    /* Sombra más amplia y suave para dar sensación de que flota */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 15, 0, 0, 4);
 }
 
-/* Alerta Roja: Stock menor a 5 */
 .tarjeta-stock-alerta {
-    -fx-background-color: #FFF5F5; 
-    -fx-border-color: #FF4D4D;     
+    -fx-background-color: #FFF5F5;
+    -fx-border-color: #FF4D4D;
     -fx-border-width: 2;
     -fx-border-radius: 8;
     -fx-background-radius: 8;
-    -fx-effect: dropshadow(three-pass-box, rgba(255,77,77,0.15), 10, 0, 0, 3);
+    -fx-effect: dropshadow(three-pass-box, rgba(255,77,77,0.2), 15, 0, 0, 4);
 }
 
-/* Alerta Verde: Stock lleno */
 .tarjeta-stock-lleno {
-    -fx-background-color: #F0FFF4; 
-    -fx-border-color: #48BB78;     
+    -fx-background-color: #F0FFF4;
+    -fx-border-color: #27ae60;
     -fx-border-width: 2;
     -fx-border-radius: 8;
     -fx-background-radius: 8;
-    -fx-effect: dropshadow(three-pass-box, rgba(72,187,120,0.15), 10, 0, 0, 3);
+    -fx-effect: dropshadow(three-pass-box, rgba(39,174,96,0.2), 15, 0, 0, 4);
 }
 
 /* =======================================================
-   2. ESTILOS GLOBALES: BOTONES
+   3. BOTONES MODERNOS (EFECTO GLOW AZUL)
    ======================================================= */
-
-/* Botón por defecto (Botón principal) */
 .button {
-    -fx-background-color: #2D3748; /* Gris oscuro elegante */
+    /* Degradado lineal de azul oscuro a azul medio */
+    -fx-background-color: linear-gradient(to right, #2980b9, #3498db);
     -fx-text-fill: #FFFFFF;
     -fx-font-weight: bold;
-    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
-    -fx-background-radius: 5;
-    -fx-border-radius: 5;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
     -fx-padding: 8px 16px;
     -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 5, 0, 0, 2);
 }
 
-/* Efecto al pasar el mouse por el botón */
 .button:hover {
-    -fx-background-color: #4A5568; 
+    /* Se invierte el degradado y aumenta el brillo de la sombra */
+    -fx-background-color: linear-gradient(to right, #3498db, #5DADE2);
+    -fx-effect: dropshadow(three-pass-box, rgba(52, 152, 219, 0.6), 12, 0, 0, 4);
 }
 
-/* Efecto al hacer clic en el botón */
 .button:pressed {
-    -fx-background-color: #1A202C;
+    /* Efecto físico de hundimiento al hacer clic */
+    -fx-background-color: #1F618D;
+    -fx-effect: none;
+    -fx-translate-y: 1px; 
 }
 
 /* =======================================================
-   3. ESTILOS GLOBALES: TABLAS (TableView)
+   4. FORMULARIOS (TEXTFIELDS Y COMBOBOX)
    ======================================================= */
-
-/* Diseño limpio para todas las tablas (Reporte, Carrito, Stock) */
-.table-view {
-    -fx-background-color: transparent;
-    -fx-border-color: #E2E8F0;
+.text-field, .combo-box {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #CBD5E0;
     -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-padding: 8px 12px;
 }
 
-/* Cabeceras de la tabla */
+.text-field:focused, .combo-box:focused {
+    -fx-border-color: #3498db;
+    -fx-border-width: 2;
+    -fx-background-insets: -1;
+    /* Resplandor exterior azul suave */
+    -fx-effect: dropshadow(three-pass-box, rgba(52, 152, 219, 0.35), 8, 0, 0, 0);
+}
+
+/* =======================================================
+   5. TABLAS ESTILO DASHBOARD CORPORATIVO
+   ======================================================= */
+.table-view {
+    -fx-background-color: transparent;
+    -fx-border-color: #CBD5E0;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 0;
+}
+
+/* Cabecera azul oscura */
 .table-view .column-header-background {
-    -fx-background-color: #EDF2F7;
-    -fx-background-radius: 5 5 0 0;
+    -fx-background-color: #2C3E50; 
+    -fx-background-radius: 7 7 0 0;
+    -fx-padding: 2px;
 }
 
 .table-view .column-header {
@@ -85,41 +111,62 @@
 }
 
 .table-view .column-header .label {
-    -fx-text-fill: #4A5568;
+    -fx-text-fill: #FFFFFF;
     -fx-font-weight: bold;
-    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
     -fx-padding: 10px 5px;
 }
 
-/* Filas de la tabla */
+/* Celdas y filas */
+/* Celdas y filas */
 .table-row-cell {
+    -fx-cell-size: 35px; /* Obligamos a la fila a tener un alto cómodo */
     -fx-background-color: #FFFFFF;
     -fx-border-color: transparent transparent #EDF2F7 transparent;
     -fx-border-width: 1;
 }
 
-/* Fila seleccionada */
+/* Espaciado del texto dentro de cada cuadrito */
+.table-cell {
+    -fx-padding: 0 10px;
+    -fx-alignment: center-left;
+}
+
+/* Estilo cebra para facilitar la lectura en tablas largas */
+.table-row-cell:odd {
+    -fx-background-color: #F8FAFC; 
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #EBF5FB;
+}
+
 .table-row-cell:selected {
-    -fx-background-color: #EBF8FF; /* Azul muy clarito */
-    -fx-text-background-color: #2B6CB0; /* Texto azul oscuro al seleccionar */
+    -fx-background-color: #3498db;
+    -fx-text-background-color: #FFFFFF;
 }
 
 /* =======================================================
-   4. ESTILOS GLOBALES: FORMULARIOS (TextFields, ComboBox)
+   6. MENÚ HAMBURGUESA Y DESPLEGABLES
    ======================================================= */
+.menu-hamburguesa {
+    -fx-background-color: transparent;
+    -fx-text-fill: #2C3E50;
+    -fx-font-size: 20px;
+    -fx-cursor: hand;
+}
 
-.text-field, .combo-box {
+.menu-hamburguesa:hover {
+    -fx-background-color: #EBF5FB;
+    -fx-background-radius: 5;
+}
+
+.context-menu {
     -fx-background-color: #FFFFFF;
     -fx-border-color: #CBD5E0;
     -fx-border-radius: 5;
-    -fx-background-radius: 5;
-    -fx-padding: 6px 10px;
-    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 10, 0, 0, 4);
 }
 
-/* Efecto cuando el usuario está escribiendo o seleccionando el campo */
-.text-field:focused, .combo-box:focused {
-    -fx-border-color: #3182CE; /* Borde azul al enfocar */
-    -fx-border-width: 2;
-    -fx-background-insets: -1;
+.menu-item:hover {
+    -fx-background-color: #EBF5FB;
 }

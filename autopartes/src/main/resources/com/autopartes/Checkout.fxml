@@ -10,11 +10,19 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+
 
 <BorderPane prefHeight="700.0" prefWidth="1000.0" stylesheets="@css/estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.autopartes.Controlador.CheckoutC">
     <top>
         <HBox alignment="CENTER_LEFT" spacing="20.0" BorderPane.alignment="CENTER">
             <children>
+                    <ImageView fitHeight="70.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true">
+                        <image>
+                            <Image url="@../images/logo_autopartes.png" />
+                        </image>
+                    </ImageView>
                 <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="CHECKOUT / REVISIÓN DE VENTA" />
                 <Region HBox.hgrow="ALWAYS" />
                 <Button fx:id="btnVolverCarrito" onAction="#volverCarrito" text="🔙 Volver al Carrito" />
