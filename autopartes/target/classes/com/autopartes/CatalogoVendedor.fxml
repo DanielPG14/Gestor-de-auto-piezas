@@ -11,6 +11,9 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+
 
 <BorderPane prefHeight="700.0" prefWidth="1000.0" stylesheets="@css/estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.autopartes.Controlador.CatalogoC">
     <top>
@@ -18,6 +21,11 @@
             <children>
                 <HBox alignment="CENTER" prefHeight="90.0" spacing="20.0">
                     <children>
+                        <ImageView fitHeight="70.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../images/logo_autopartes.png" />
+                            </image>
+                        </ImageView>
                         <MenuButton prefHeight="45.0" styleClass="menu-hamburguesa" text="☰">
                             <items>
                                 <MenuItem onAction="#irACatalogo" text="Catálogo" />
